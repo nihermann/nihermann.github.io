@@ -22,7 +22,7 @@
                 <p class="name" style="text-align: center;">
                   Nicolai Hermann
                 </p>
-                <p>I'm a research assistant at <a href="https://www.pdf.inf.usi.ch/index.html">The Perception, Display, and Fabrication Group</a> at IDSIA-USI, in Lugano (Switzerland), where I'm continuing the work from my thesis and support the research of my colleagues.
+                <p>I'm a research assistant at <a href="https://www.pdf.inf.usi.ch/index.html">The Perception, Display, and Fabrication Group</a> at IDSIA-USI, in Lugano (Switzerland), where I'm working on 3D scene reconstruction.
                 </p>
 <!--                <p>-->
 <!--                  At Google I've worked on <a href="https://www.google.com/glass/start/">Glass</a>,  <a href="https://ai.googleblog.com/2014/04/lens-blur-in-new-google-camera-app.html">Lens Blur</a>, <a href="https://ai.googleblog.com/2014/10/hdr-low-light-and-high-dynamic-range.html">HDR+</a>, <a href="https://blog.google/products/google-ar-vr/introducing-next-generation-jump/">VR</a>, <a href="https://ai.googleblog.com/2017/10/portrait-mode-on-pixel-2-and-pixel-2-xl.html">Portrait Mode</a>, <a href="https://ai.googleblog.com/2020/12/portrait-light-enhancing-portrait.html">Portrait Light</a>, and <a href="https://blog.google/products/maps/three-maps-updates-io-2022/">Maps</a>. I did my PhD at <a href="http://www.eecs.berkeley.edu/">UC Berkeley</a>, where I was advised by <a href="http://www.cs.berkeley.edu/~malik/">Jitendra Malik</a>. I've received the <a href="https://www.thecvf.com/?page_id=413#YRA">PAMI Young Researcher Award</a>.-->
@@ -54,24 +54,23 @@
 
 
           <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
-          <tr onmouseout="nerfcasting_stop()" onmouseover="nerfcasting_start()">
+          <tr onmouseout="puzzle_stop()" onmouseover="puzzle_start()">
             <td style="padding:20px;width:25%;vertical-align:middle">
               <div class="one">
-                <div class="two" id='nerfcasting_image'><video  width=100% muted autoplay loop>
-                  <source src="images/nerfcasting.mp4" type="video/mp4">
-                  Your browser does not support the video tag.
-                </video></div>
-                <img src='images/nerfcasting.jpg' width=100%>
+                <div class="two" id='puzzle_image'>
+                  <img src='images/puzzle_before.png' style="width: 175px; height: 175px; object-fit: cover; object-position: 50% 0;">
+                </div>
+                <img src='images/puzzle_after.png' style="width: 175px; height: 175px; object-fit: cover; object-position: 50% 0;">
               </div>
               <script type="text/javascript">
-                function nerfcasting_start() {
-                  document.getElementById('nerfcasting_image').style.opacity = "1";
+                function puzzle_start() {
+                  document.getElementById('puzzle_image').style.opacity = "1";
                 }
 
-                function nerfcasting_stop() {
-                  document.getElementById('nerfcasting_image').style.opacity = "0";
+                function puzzle_stop() {
+                  document.getElementById('puzzle_image').style.opacity = "0";
                 }
-                nerfcasting_stop()
+                puzzle_stop()
               </script>
             </td>
             <td style="padding:20px;width:75%;vertical-align:middle">
@@ -81,16 +80,16 @@
               <br>
               <strong>Nicolai Hermann</strong>,
               <a href="https://arcanous98.github.io/">Jorge Condor</a>,
-              <a href=https://www.pdf.inf.usi.ch/people/piotr/">Piotr Didyk</a>
+              <a href="https://www.pdf.inf.usi.ch/people/piotr/">Piotr Didyk</a>
 <!--              <br>-->
 <!--              <em>SIGGRAPH Asia</em>, 2024-->
               <br>
-              <a href="#">project page</a>
+              <a href="puzzlesim/index.html">project page</a>
               /
               <a href="https://arxiv.org/abs/2411.17489">arXiv</a>
               <p></p>
               <p>
-                Carefully casting reflection rays lets us synthesize photorealistic specularities in real-world scenes.
+                Automatic quality map generation for novel views to assess the quality of 3D scene reconstructions beyond supervised areas.
               </p>
             </td>
           </tr>
