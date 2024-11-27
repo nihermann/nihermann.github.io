@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
 
-    <title>Zip-NeRF</title>
+    <title>Puzzle Similarity</title>
 
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -26,7 +26,7 @@
     <meta name="twitter:image" content="https://jonbarron.info/zipnerf/img/teaser.jpg" />
 
 
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+<link rel="icon" href="img/puzzle_piece.svg">
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
@@ -48,9 +48,9 @@
     <div class="container" id="main">
         <div class="row">
             <h2 class="col-md-12 text-center">
-                <b>Zip-NeRF</b>: Anti-Aliased Grid-Based Neural Radiance Fields</br> 
+                <b>Puzzle Similarity</b>: A Perceptually-guided No-Reference Metric<br>for Artifact Detection in 3D Scene Reconstructions</br>
                 <small>
-                ICCV 2023 (Oral Presentation, Best Paper Finalist)
+                ArXiv 2024
                 </small>
             </h2>
         </div>
@@ -58,31 +58,21 @@
             <div class="col-md-12 text-center">
                 <ul class="list-inline">
                     <li>
-                        <a href="https://jonbarron.info/">
-                          Jonathan T. Barron
+                        <a href="../index.html">
+                          Nicolai Hermann
                         </a>
                     </li>
                     <li>
-                        <a href="http://bmild.github.io/">
-                            Ben Mildenhall
+                        <a href="https://arcanous98.github.io/">
+                            Jorge Condor
                         </a>
                     </li>
                     <li>
-                        <a href="http://dorverbin.github.io/">
-                          Dor Verbin
+                        <a href="https://www.pdf.inf.usi.ch/people/piotr/">
+                          Piotr Didyk
                         </a>
                     </li>
-                    <li>
-                        <a href="https://pratulsrinivasan.github.io/">
-                          Pratul P. Srinivasan
-                        </a>
-                    </li>
-                    <li>
-                        <a href="https://phogzone.com/">
-                          Peter Hedman
-                        </a>
-                    </li>
-                    </br>Google
+                    </br>IDSIA-USI
                 </ul>
             </div>
         </div>
@@ -93,48 +83,48 @@
                     <ul class="nav nav-pills nav-justified">
                         <li>
                             <a href="https://arxiv.org/abs/2304.06706">
-                            <image src="img/zip_paper_image.jpg" height="60px">
+                            <image src="img/puzzle_paper_image.jpg" height="60px">
                                 <h4><strong>Paper</strong></h4>
                             </a>
                         </li>
+<!--                        <li>-->
+<!--                            <a href="https://www.youtube.com/watch?v=xrrhynRzC8k">-->
+<!--                            <image src="img/youtube_icon.png" height="60px">-->
+<!--                                <h4><strong>Video</strong></h4>-->
+<!--                            </a>-->
+<!--                        </li>-->
                         <li>
-                            <a href="https://www.youtube.com/watch?v=xrrhynRzC8k">
-                            <image src="img/youtube_icon.png" height="60px">
-                                <h4><strong>Video</strong></h4>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="https://github.com/jonbarron/camp_zipnerf">
+                            <a href="https://github.com/nihermann/">
                             <image src="img/github.png" height="60px">
                                 <h4><strong>Code</strong></h4>
                             </a>
                         </li>
                         <li>
-                            <a href="https://smerf-3d.github.io/#data">
+                            <a href="#">
                             <image src="img/database_icon.png" height="60px">
                                 <h4><strong>Data</strong></h4>
                             </a>
                         </li>
 
-                        <li>
-                            <a href="https://github.com/GoogleCloudPlatform/vertex-ai-samples/blob/main/notebooks/community/model_garden/model_garden_camp_zipnerf.ipynb">
-                            <image src="img/VertexAI-512-color.webp" height="60px">
-                                <h4><strong>Google Vertex AI Notebook</strong></h4>
-                            </a>
-                        </li>
+<!--                        <li>-->
+<!--                            <a href="https://github.com/GoogleCloudPlatform/vertex-ai-samples/blob/main/notebooks/community/model_garden/model_garden_camp_zipnerf.ipynb">-->
+<!--                            <image src="img/VertexAI-512-color.webp" height="60px">-->
+<!--                                <h4><strong>Google Vertex AI Notebook</strong></h4>-->
+<!--                            </a>-->
+<!--                        </li>-->
                     </ul>
                 </div>
         </div>
 
 
 
-        <div class="row">
-            <div class="col-md-8 col-md-offset-2">
-                <video id="v0" width="100%" autoplay loop muted controls>
-                  <source src="img/teaser.mp4" type="video/mp4" />
-                </video>
-						</div>
-        </div>
+<!--        <div class="row">-->
+<!--            <div class="col-md-8 col-md-offset-2">-->
+<!--                <video id="v0" width="100%" autoplay loop muted controls>-->
+<!--                  <source src="img/teaser.mp4" type="video/mp4" />-->
+<!--                </video>-->
+<!--						</div>-->
+<!--        </div>-->
 
 
         <div class="row">
@@ -143,7 +133,7 @@
                     Abstract
                 </h3>
                 <p class="text-justify">
-Neural Radiance Field training can be accelerated through the use of grid-based representations in NeRF's learned mapping from spatial coordinates to colors and volumetric density. However, these grid-based approaches lack an explicit understanding of scale and therefore often introduce aliasing, usually in the form of jaggies or missing scene content. Anti-aliasing has previously been addressed by mip-NeRF 360, which reasons about sub-volumes along a cone rather than points along a ray, but this approach is not natively compatible with current grid-based techniques. We show how ideas from rendering and signal processing can be used to construct a technique that combines mip-NeRF 360 and grid-based models such as Instant NGP to yield error rates that are 8%-77% lower than either prior technique, and that trains 24x faster than mip-NeRF 360.
+                    Modern reconstruction techniques can effectively model complex 3D scenes from sparse 2D views. However, automatically assessing the quality of novel views and identifying artifacts is challenging due to the lack of ground truth images and the limitations of no-reference image metrics in predicting detailed artifact maps. The absence of such quality metrics hinders accurate predictions of the quality of generated views and limits the adoption of post-processing techniques, such as inpainting, to enhance reconstruction quality. In this work, we propose a new no-reference metric, Puzzle Similarity, which is designed to localize artifacts in novel views. Our approach utilizes image patch statistics from the input views to establish a scene-specific distribution that is later used to identify poorly reconstructed regions in the novel views. We test and evaluate our method in the context of 3D reconstruction; to this end, we collected a novel dataset of human quality assessment in unseen reconstructed views. Through this dataset, we demonstrate that our method can not only successfully localize artifacts in novel views, correlating with human assessment, but do so without direct references. Surprisingly, our metric outperforms both no-reference metrics and popular full-reference image metrics. We can leverage our new metric to enhance applications like automatic image restoration, guided acquisition, or 3D reconstruction from sparse inputs.
                 </p>
             </div>
         </div>
@@ -239,12 +229,14 @@ Neural Radiance Field training can be accelerated through the use of grid-based 
                 </h3>
                 <div class="form-group col-md-10 col-md-offset-1">
                     <textarea id="bibtex" class="form-control" readonly>
-@article{barron2023zipnerf,
-    title={Zip-NeRF: Anti-Aliased Grid-Based Neural Radiance Fields},
-    author={Jonathan T. Barron and Ben Mildenhall and 
-            Dor Verbin and Pratul P. Srinivasan and Peter Hedman},
-    journal={ICCV},
-    year={2023}
+@misc{hermann2024puzzlesim,
+      title={Puzzle Similarity: A Perceptually-guided No-Reference Metric for Artifact Detection in 3D Scene Reconstructions},
+      author={Nicolai Hermann and Jorge Condor and Piotr Didyk},
+      year={2024},
+      eprint={2411.17489},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV},
+      url={https://arxiv.org/abs/2411.17489},
 }</textarea>
                 </div>
             </div>
@@ -256,7 +248,7 @@ Neural Radiance Field training can be accelerated through the use of grid-based 
                     Acknowledgements
                 </h3>
                 <p class="text-justify">
-                Thanks to Janne Kontkanen, Rick Szeliski, and David Salesin for their comments on the text, and to Ricardo Martin-Brualla, Keunhong Park, Ben Poole, Aleksander Hołyński, Etienne Pot, Kostas Rematas, Daniel Duckworth, Marcos Seefelder, Cardin Moffett, and Peter Zhizhin for their advice and help.
+                    We would like to thank Krzysztof Wolski for making their image segmentation tool available to us, Volodymyr Kyrylov for providing the idea and first prototype of the memory-efficient implementation, and Sophie Kergaßner for designing figures. This project has received funding from the European Research Council (ERC) under the European Union’s Horizon 2020 research and innovation program (grant agreement N° 804226 PERDY), from the Swiss National Science Foundation (SNSF, Grant 200502) and an academic gift from Meta.
                     <br><br>
                 The website template was borrowed from <a href="http://mgharbi.com/">Michaël Gharbi</a> and <a href="https://dorverbin.github.io/refnerf">Ref-NeRF</a>.
                 </p>
