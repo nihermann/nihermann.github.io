@@ -89,7 +89,7 @@
 <!--                            </a>-->
 <!--                        </li>-->
                         <li>
-                            <a href="https://github.com/nihermann/">
+                            <a href="https://github.com/nihermann/PuzzleSim">
                             <image src="img/github.png" height="60px">
                                 <h4><strong>Code</strong></h4>
                             </a>
@@ -208,6 +208,19 @@
 <!--                </p>-->
 <!--            </div>-->
 <!--        </div>-->
+<!--        <br>-->
+<!--        <div class="row">-->
+<!--            <div class="col-md-8 col-md-offset-2">-->
+<!--                <h3>-->
+<!--                    XY aliasing-->
+<!--                </h3>-->
+<!--                <video class="video" width=100% id="xyalias" loop playsinline autoplay muted src="img/xy_alias_swipe_crf27.mp4" onplay="resizeAndPlay(this)"></video>-->
+<!--                <canvas height=0 class="videoMerge" id="xyaliasMerge"></canvas>-->
+<!--                <p class="text-justify">-->
+<!--                    A naive baseline (left) combining mip-NeRF 360 and Instant NGP results in aliasing as the camera moves laterally. Our full method (right) produces prefiltered renderings that do not flicker or shimmer.-->
+<!--                </p>-->
+<!--            </div>-->
+<!--        </div>-->
 
 <!--        <div class="row">-->
 <!--            <div class="col-md-8 col-md-offset-2">-->
@@ -222,6 +235,20 @@
 <!--                </p>-->
 <!--            </div>-->
 <!--        </div>-->
+
+            <div class="row">
+                <div class="col-md-8 col-md-offset-2">
+                    <h3>
+                        Application
+                    </h3>
+                    <image src="img/applications.svg" width="100%">
+                    <image src="img/applications-2.svg" width="100%">
+                    <p class="text-justify">
+                        <br>
+                        Our metric can also be applied in automatic restoration of novel images from a reconstructed scene. Whenever it is possible to establish a visual distribution (e.g. we have a training dataset available), we can recursively use our metric to automatically identify visual outliers in novel views and remove them through neural inpainting.
+                    </p>
+                </div>
+            </div>
 
         <div class="row">
             <div class="col-md-8 col-md-offset-2">
