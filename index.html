@@ -111,14 +111,66 @@
                 <span class="papertitle">Perceptually-Driven Neural Inpainting for Seamless 3D Reconstructions</span>
               </a>
               <br>
-              Supervision: <a href="https://arcanous98.github.io/">Jorge Condor</a> and
-              <a href="https://www.pdf.inf.usi.ch/people/piotr/">Piotr Didyk</a>.
+              Supervision: <a href="https://arcanous98.github.io/">Jorge Condor</a>,
+              <a href="https://www.pdf.inf.usi.ch/people/piotr/">Piotr Didyk</a>
               <br>
               Awarded the "<em style="color: red">Best Thesis Award</em>" from the <a href="https://www.fondazionepremio.ch/">Premio Swiss Engineering Ticino</a> foundation.
               <br>
               <p></p>
               <p>
                 In my master’s thesis, I improved novel Scene Reconstruction methods, such as Gaussian Splatting. I introduced a new approach that assesses reconstruction quality by leveraging the input multiview content as priors to evaluate novel views. I then demonstrated the method’s effectiveness by devising a strategy that hallucinates incorrectly reconstructed parts of a scene.
+              </p>
+            </td>
+          </tr>
+
+          <tr onmouseout="mc_stop()" onmouseover="mc_start()">
+            <td style="padding:20px 20px 45px 20px;width:25%;vertical-align:middle">
+              <div class="one">
+                <div class="two" id='mc_image'>
+                  <video id="mc_video"
+                         src="images/mc_localization.mov"
+                         width="175" height="175"
+                         muted playsinline preload="metadata"
+                         style="object-fit:cover;object-position:50% 5%;position:absolute;top:0;left:0;opacity:0;transition:opacity .2s">
+                  <!-- Fallback text -->
+                  Your browser doesn’t support embedded video.
+                  </video>
+                </div>
+                <img src='images/mc_localization.png' style="width: 175px; height: 175px; object-fit: cover; object-position: 50% 5%;">
+              </div>
+              <script type="text/javascript">
+                const vid = document.getElementById('mc_video');
+
+                function mc_start () {
+                  // show + start from the beginning
+                  vid.currentTime = 0;
+                  vid.play();
+                  vid.style.opacity = '1';
+                }
+
+                function mc_stop () {
+                  // hide + pause to save CPU
+                  vid.pause();
+                  vid.currentTime = 0;      // reset so it restarts next hover
+                  vid.style.opacity = '0';
+                }
+              </script>
+            </td>
+            <td style="padding:20px;width:75%;vertical-align:middle">
+              <a href="data/Markov_Localization___Final_Robotics_Project.pdf">
+                <span class="papertitle">Robotics: Markov Localization and Monte Carlo Localization</span>
+              </a>
+              <br>
+              Nicolai Hermann,
+              <a href="https://www.linkedin.com/in/michele-cattaneo-614527210/">Michele Cattaneo</a>,
+              <a href="https://www.linkedin.com/in/oliver-tryding-954171266/">Oliver Tryding</a>
+              <br>
+              <a href="data/Markov_Localization___Final_Robotics_Project.pdf">Project Report</a>
+              /
+              <a href="https://github.com/MicheleCattaneo/Markov_and_Monte_Carlo_Localization">Code</a>
+              <p></p>
+              <p>
+                In this project, we built a small simulator and implemented Markov localization to maintain a full probability grid of robot poses after each motion and sensor reading. For larger or continuous maps, we switched to Monte Carlo localization, replacing the exhaustive grid with a compact set of weighted particles.
               </p>
             </td>
           </tr>
