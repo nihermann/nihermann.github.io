@@ -8,11 +8,23 @@
     <meta name="author" content="Nicolai Hermann">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="shortcut icon" href="images/favicon/favicon.ico" type="image/x-icon">
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.rawgit.com/jpswalsh/academicons/master/css/academicons.min.css">
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-1168479-8"></script>
+
     <link rel="stylesheet" type="text/css" href="stylesheet.css">
+
+    <style>
+      .p-bibtex {font-size: 12px; margin-bottom: 0px; max-width: 650px; text-align: left;}
+    </style>
     
   </head>
 
   <body>
+  <main class="container">
+
     <table style="width:100%;max-width:800px;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
       <tr style="padding:0px">
         <td style="padding:0px">
@@ -37,7 +49,7 @@
                 </p>
               </td>
               <td style="padding:2.5%;width:40%;max-width:40%">
-                <a href="images/nicolai_hermann_profile.jpg"><img style="width:100%;max-width:100%;object-fit: contain; border-radius: 50%;" alt="profile photo" src="images/nicolai_hermann_profile.jpg" class="hoverZoomLink"></a>
+                <img style="width:100%;max-width:100%;object-fit: contain; border-radius: 50%;" alt="profile photo" src="images/nicolai_hermann_profile.jpg" class="hoverZoomLink">
               </td>
             </tr>
           </tbody></table>
@@ -74,29 +86,43 @@
               </script>
             </td>
             <td style="padding:20px 20px 0 20px; width:75%; vertical-align:middle">
-              <a href="puzzlesim/index.html">
+              <a target="_blank" href="puzzlesim/index.html">
                 <span class="papertitle">Puzzle Similarity: A Perceptually-guided Cross-Reference Metric for Artifact Detection in 3D Scene Reconstructions</span>
               </a>
               <br>
               <strong>Nicolai Hermann</strong>,
-              <a href="https://arcanous98.github.io/">Jorge Condor</a>,
-              <a href="https://www.pdf.inf.usi.ch/people/piotr/">Piotr Didyk</a>
+              <a target="_blank" href="https://arcanous98.github.io/">Jorge Condor</a>,
+              <a target="_blank" href="https://www.pdf.inf.usi.ch/people/piotr/">Piotr Didyk</a>
               <br>
-              <em>ICCV</em>, 2025
+              <em>Proc. International Conference on Computer Vision (ICCV), 2025</em>
               <br>
-              <a href="puzzlesim/index.html">Project Page</a>
-              /
-              <a href="https://arxiv.org/abs/2411.17489">arXiv</a>
-              /
-              <a href="https://github.com/nihermann/PuzzleSim">Code</a>
-              /
-              <a href="https://huggingface.co/datasets/nihermann/annotated-3DGS-artifacts">Data</a>
-              /
-              <a href="puzzlesim/data/Puzzle_Similarity_Supplemental.pdf">Supplemental</a>
+              <a target="_blank" class="mr-2" href="puzzlesim/index.html"><i class="fa fa-cube"></i> Project Page</a>
+
+              <a target="_blank" class="mr-2" href="https://arxiv.org/abs/2411.17489"><i class="fas fa-file-pdf"></i> Paper</a>
+
+              <a target="_blank" class="mr-2" href="https://github.com/nihermann/PuzzleSim"><i class="fa fa-code"></i> Code</a>
+
+              <a target="_blank" class="mr-2" href="https://huggingface.co/datasets/nihermann/annotated-3DGS-artifacts"><i class="fa fa-database"></i> Data</a>
+
+              <a target="_blank" class="mr-2" href="puzzlesim/data/Puzzle_Similarity_Supplemental.pdf"><i class="fa fa-file-circle-plus"></i> Supplemental</a>
+
+<!--              <a class="mr-2" data-toggle="collapse" href="#bibtex_supergen" role="button" aria-expanded="false" aria-controls="bibtex_supergen"><i class="far fa-file-alt"></i> BibTeX</a>-->
               <p></p>
               <p>
                 Automatic 2D quality map generation for novel views assessing the quality of 3D scene reconstructions beyond supervised areas.
               </p>
+
+<!--              <div class="collapse" id="bibtex_supergen">-->
+<!--                <div class="card card-body">-->
+<!--<pre class="p-bibtex">@article{engelmann2025supergen,-->
+<!--  title   = {{SuperGen: Introducing Spatial Control to 3D Generative Modeling}},-->
+<!--  author  = {Francis Engelmann, Elisabetta Fedele, Ian Huang, Or Litany, Marc Pollefeys, Leonidas Guibas},-->
+<!--  journal = {arXiv preprint},-->
+<!--  year    = {2025}-->
+<!--}</pre>-->
+<!--                </div>-->
+<!--              </div>-->
+
             </td>
           </tr>
 
@@ -107,15 +133,17 @@
               </div>
             </td>
             <td style="padding:20px 20px 0 20px; width:75%; vertical-align:middle">
-              <a href="https://thesis.bul.sbu.usi.ch/theses/2340-2324Hermann/pdf?1730797532">
+              <a target="_blank" href="https://thesis.bul.sbu.usi.ch/theses/2340-2324Hermann/pdf?1730797532">
                 <span class="papertitle">Perceptually-Driven Neural Inpainting for Seamless 3D Reconstructions</span>
               </a>
               <br>
-              Supervision: <a href="https://arcanous98.github.io/">Jorge Condor</a>,
-              <a href="https://www.pdf.inf.usi.ch/people/piotr/">Piotr Didyk</a>
+              Awarded the "<em style="color: red">Best Thesis Award</em>" from the <a target="_blank" href="https://www.fondazionepremio.ch/">Premio Swiss Engineering Ticino</a> foundation.
               <br>
-              Awarded the "<em style="color: red">Best Thesis Award</em>" from the <a href="https://www.fondazionepremio.ch/">Premio Swiss Engineering Ticino</a> foundation.
-              <br>
+              <a target="_blank" class="mr-2" href="https://thesis.bul.sbu.usi.ch/theses/2340-2324Hermann/pdf?1730797532"><i class="fas fa-book"></i> Thesis</a>
+              <a target="_blank" class="mr-2" href="https://www.usi.ch/it/feeds/32067"><i class="fas fa-medal"></i> Announcement</a>
+
+
+
               <p></p>
               <p>
                 In my master’s thesis, I improved novel Scene Reconstruction methods, such as Gaussian Splatting. I introduced a new approach that assesses reconstruction quality by leveraging the input multiview content as priors to evaluate novel views. I then demonstrated the method’s effectiveness by devising a strategy that hallucinates incorrectly reconstructed parts of a scene.
@@ -132,23 +160,21 @@
               </div>
             </td>
             <td style="padding:20px 20px 0 20px; width:75%; vertical-align:middle">
-              <a href="data/Reproducibility_Challenge_PolyGCL.pdf">
+              <a target="_blank" href="data/Reproducibility_Challenge_PolyGCL.pdf">
                 <span class="papertitle">Reproducibility Challenge—PolyGCL: GRAPH CONTRASTIVE LEARNING via Learnable Spectral Polynomial Filters</span>
               </a>
               <br>
               Nicolai Hermann,
-              <a href="https://www.linkedin.com/in/michele-cattaneo-614527210/">Michele Cattaneo</a>,
-              <a href="https://www.linkedin.com/in/oliver-tryding-954171266/">Oliver Tryding</a>
+              <a target="_blank" href="https://www.linkedin.com/in/michele-cattaneo-614527210/">Michele Cattaneo</a>,
+              <a target="_blank" href="https://www.linkedin.com/in/oliver-tryding-954171266/">Oliver Tryding</a>
               <br>
-              <a href="data/Reproducibility_Challenge_PolyGCL.pdf">Project Report</a>
-              /
-              <a href="https://github.com/OliverTryding/-RE-POLYGCL">Reproduced Code</a>
-              /
-              <a href="https://wandb.ai/nihermann/RE-PolyGCL">WandB</a>
-              /
-              <a href="https://openreview.net/pdf?id=y21ZO6M86t">Original Paper</a>
-              /
-              <a href="https://github.com/ChenJY-Count/PolyGCL">Original Code</a>
+
+              <a target="_blank" class="mr-2" href="data/Reproducibility_Challenge_PolyGCL.pdf"><i class="fa fa-file-pdf"></i> Project Report</a>
+              <a target="_blank" class="mr-2" href="https://github.com/OliverTryding/-RE-POLYGCL"><i class="fa fa-code"></i> Reproduced Code</a>
+              <a target="_blank" class="mr-2" href="https://wandb.ai/nihermann/RE-PolyGCL"><i class="fa fa-braille"></i> WandB</a>
+              <a target="_blank" class="mr-2" href="https://openreview.net/pdf?id=y21ZO6M86t"><i class="fa fa-file-pdf"></i> PolyGLC</a>
+              <a target="_blank" class="mr-2" href="https://github.com/ChenJY-Count/PolyGCL"><i class="fa fa-code"></i> PolyGCL Code</a>
+
               <p></p>
               <p>
                 In this paper, we replicate PolyGCL, which frames self-supervised graph contrastive learning as a spectral-polynomial fusion of high- and low-pass graph filters. Our study mostly reproduced the reported gains on both homophilic and heterophilic graphs—confirming its ability to learn expressive node embeddings—while noting that results still depend on careful hyper-parameter calibration relying on labeled data, compromising the self-supervised approach.
@@ -190,17 +216,18 @@
               </script>
             </td>
             <td style="padding:20px 20px 0 20px; width:75%; vertical-align:middle">
-              <a href="data/Markov_Localization___Final_Robotics_Project.pdf">
+              <a target="_blank" href="data/Markov_Localization___Final_Robotics_Project.pdf">
                 <span class="papertitle">Robotics: Markov Localization and Monte Carlo Localization</span>
               </a>
               <br>
               Nicolai Hermann,
-              <a href="https://www.linkedin.com/in/michele-cattaneo-614527210/">Michele Cattaneo</a>,
-              <a href="https://www.linkedin.com/in/oliver-tryding-954171266/">Oliver Tryding</a>
+              <a target="_blank" href="https://www.linkedin.com/in/michele-cattaneo-614527210/">Michele Cattaneo</a>,
+              <a target="_blank" href="https://www.linkedin.com/in/oliver-tryding-954171266/">Oliver Tryding</a>
               <br>
-              <a href="data/Markov_Localization___Final_Robotics_Project.pdf">Project Report</a>
-              /
-              <a href="https://github.com/MicheleCattaneo/Markov_and_Monte_Carlo_Localization">Code</a>
+
+              <a target="_blank" class="mr-2" href="data/Markov_Localization___Final_Robotics_Project.pdf"><i class="fa fa-file-pdf"></i> Project Report</a>
+              <a target="_blank" class="mr-2" href="https://github.com/MicheleCattaneo/Markov_and_Monte_Carlo_Localization"><i class="fa fa-code"></i> Code</a>
+
               <p></p>
               <p>
                 In this project, we built a small simulator and implemented Markov localization to maintain a full probability grid of robot poses after each motion and sensor reading. For larger or continuous maps, we switched to Monte Carlo localization, replacing the exhaustive grid with a compact set of weighted particles (see blue points in the animation).
@@ -215,16 +242,17 @@
               </div>
             </td>
             <td style="padding:20px 20px 0 20px; width:75%; vertical-align:middle">
-              <a href="data/pokegans.pdf">
+              <a target="_blank" href="data/pokegans.pdf">
                 <span class="papertitle">Pokégans: Using Generative Adversarial Networks to Create the Next Generation of Pokémons</span>
               </a>
               <br>
               Nicolai Hermann,
-              <a href="https://www.linkedin.com/in/michael-h%C3%BCppe-1053b61a1">Michael Hüppe</a>
+              <a target="_blank" href="https://www.linkedin.com/in/michael-h%C3%BCppe-1053b61a1">Michael Hüppe</a>
               <br>
-              <a href="data/pokegans.pdf">Project Report</a>
-              /
-              <a href="https://github.com/nihermann/Pokemaenner">Code</a>
+
+              <a target="_blank" class="mr-2" href="data/pokegans.pdf"><i class="fa fa-file-pdf"></i> Project Report</a>
+              <a target="_blank" class="mr-2" href="https://github.com/nihermann/Pokemaenner"><i class="fa fa-code"></i> Code</a>
+
               <p></p>
               <p>
                 In this paper, we present a compact pipeline that trains a bespoke generative adversarial network to create convincing “Fakémon” sprites. Using a curated, uniformly pre-processed corpus of original Pokémon graphics, the model learns franchise-specific aesthetics and outputs novel, game-ready creatures. The paper details data acquisition and network design, showcases fan-project applications, and highlights future optimisation paths to boost fidelity and training efficiency.
@@ -236,5 +264,7 @@
         </td>
       </tr>
     </table>
+  </main>
+
   </body>
 </html>
