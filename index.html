@@ -291,6 +291,51 @@
             </td>
           </tr>
 
+          <tr>
+            <td style="padding:40px 20px; width:25%; vertical-align:middle">
+              <div class="one">
+                <div class="two">
+                  <img src='images/website_qr.png' id="qr-image" style="width: 175px; height: 175px; object-fit: cover; object-position: 50% 5%;">
+                </div>
+              </div>
+            </td>
+            <td style="padding:28px 0 0 30px; width:75%; vertical-align:middle">
+                <span class="h5">Mini Project: Create your own QR Code</span>
+              <br>
+              <p></p>
+              <p>
+              <div class="mb-3">
+                <input oninput="generateQRCode()" onchange="generateQRCode()" type="text" id="qrcode-input" value="https://nihermann.github.io/" class="form-control" style="max-width: 300px;">
+                <div class="invalid-feedback">Can't create empty qr codes.</div>
+              </div>
+              <button id="qr-download-btn" onclick="downloadImage()" class="btn btn-success">Download QR Code</button>
+              </p>
+            </td>
+          </tr>
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.4.4/qrcode.min.js" integrity="sha512-6x997BOv0e4O+G45Cwr4PZMYXP0ATChLcSob5IB6DPpXvDfRDMBFClXOg5ahmIVBoAf2tnsENpkHRJckceZiwQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+          <script>
+            const qr_url = document.getElementById('qrcode-input');
+            const qrcodeImage = document.getElementById('qr-image');
+            const downloadButton = document.getElementById('qr-download-btn');
+            async function generateQRCode() {
+              if (qr_url.value === "") {
+                qr_url.classList.add("is-invalid")
+                downloadButton.disabled = true;
+                console.log("QR code generation failed: URL is empty");
+                return;
+              } else {
+                qr_url.classList.remove("is-invalid")
+                downloadButton.disabled = false;
+              }
+              qrcodeImage.src = await QRCode.toDataURL(qr_url.value);
+            }
+            function downloadImage() {
+              const link = document.createElement('a');
+              link.href = qrcodeImage.src;
+              link.download = `${qr_url.value.replace(/https?:\/\//, '').replace(/\//g, '_')}.png`;
+              link.click();
+            }
+          </script>
           </tbody></table>
         </td>
       </tr>
