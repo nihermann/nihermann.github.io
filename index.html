@@ -349,7 +349,8 @@
                 <input oninput="generateQRCode()" onchange="generateQRCode()" type="text" id="qrcode-input" value="https://nihermann.github.io/" class="form-control" style="max-width: 300px;">
                 <div class="invalid-feedback">Can't create empty qr codes.</div>
               </div>
-              <button id="qr-download-btn" onclick="downloadImage()" class="btn btn-success">Download QR Code</button>
+              <button id="qr-download-btn" onclick="downloadImage()" class="btn btn-success">Download PNG</button>
+              <button id="qr-download-svg-btn" onclick="downloadSVG()" class="btn btn-success ml-2">Download SVG</button>
               </p>
             </td>
           </tr>
@@ -358,15 +359,19 @@
             const qr_url = document.getElementById('qrcode-input');
             const qrcodeImage = document.getElementById('qr-image');
             const downloadButton = document.getElementById('qr-download-btn');
+            const downloadSvgButton = document.getElementById('qr-download-svg-btn');
+
             async function generateQRCode() {
               if (qr_url.value === "") {
                 qr_url.classList.add("is-invalid")
                 downloadButton.disabled = true;
+                downloadSvgButton.disabled = true;
                 console.log("QR code generation failed: URL is empty");
                 return;
               } else {
                 qr_url.classList.remove("is-invalid")
                 downloadButton.disabled = false;
+                downloadSvgButton.disabled = false;
               }
               qrcodeImage.src = await QRCode.toDataURL(qr_url.value);
             }
@@ -374,6 +379,13 @@
               const link = document.createElement('a');
               link.href = qrcodeImage.src;
               link.download = `${qr_url.value.replace(/https?:\/\//, '').replace(/\//g, '_')}.png`;
+              link.click();
+            }
+            async function downloadSVG() {
+              const link = document.createElement('a');
+              const qr = await QRCode.toString(qr_url.value, {type: "svg"});
+              link.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(qr);
+              link.download = `${qr_url.value.replace(/https?:\/\//, '').replace(/\//g, '_')}.svg`;
               link.click();
             }
           </script>
