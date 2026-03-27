@@ -84,6 +84,7 @@
                       <h2>News</h2>
                       <p>
                           <ul>
+                              <li><strong>Mar 2026</strong>: Our paper <a target="_blank" href="https://arxiv.org/abs/2602.05081">Gabor Fields</a> was accepted to <a target="_blank" href="https://dl.acm.org/journal/tog">ACM Transactions on Graphics</a> to be presented at <a target="_blank" href="https://s2026.siggraph.org/">SIGGRAPH'26</a>.</li>
                               <li><strong>Nov 2025</strong>: I will co-organize the 6<sup>th</sup> iteration of the <a href="https://opensun3d.github.io/">Open-Vocabulary 3D Scene Understanding Workshop</a> at <a href="https://cvpr.thecvf.com/Conferences/2026">CVPR'26</a>.</li>
                               <li><strong>Sep 2025</strong>: I started my <strong>PhD</strong> in Computer Vision at the <a href="https://www.usi.ch/en">University of Lugano</a> (USI).</li>
                               <li><strong>Oct 2025</strong>: I visited the <a href="https://geometry.stanford.edu">Guibas Lab</a> in <a href="https://www.stanford.edu">Stanford</a> to present my recent work.</li>
@@ -97,6 +98,8 @@
               </tr>
               <td style="padding:20px;width:100%;vertical-align:middle">
                 <h2>Research</h2>
+                <em>* denotes equal contribution</em>
+
 <!--                <p>-->
 <!--                  I'm interested in computer vision, deep learning, generative AI, and image processing. Most of my research is about inferring the physical world (shape, motion, color, light, etc) from images, usually with radiance fields. Some papers are <span class="highlight">highlighted</span>.-->
 <!--                </p>-->
@@ -106,6 +109,35 @@
 
 
           <table style="width:100%; border-spacing:0; border-collapse:separate; margin-right:auto; margin-left:auto;"><tbody>
+          <tr>
+            <td style="padding:40px 20px; width:25%; vertical-align:middle">
+              <div class="one">
+                <img src='images/gabor_teaser_cropped.png' style="width: 175px; height: 175px; object-fit: cover; object-position: 50% 5%;">
+              </div>
+            </td>
+            <td style="padding:40px 0 0 30px; width:75%; vertical-align:middle">
+              <a target="_blank" href="https://arxiv.org/abs/2602.05081">
+                <span class="papertitle">Gabor Fields: Orientation-Selective Level-of-Detail for Volume Rendering</span>
+              </a>
+              <br>
+              <a target="_blank" href="https://arcanous98.github.io/">Jorge Condor*</a>,
+              <strong>Nicolai Hermann*</strong>,
+              <a target="_blank" href="#">Ata Yurtsever</a>,
+              <a target="_blank" href="https://www.pdf.inf.usi.ch/people/piotr/">Piotr Didyk</a>
+              <br>
+              <br>
+              <em>ACM Transactions on Graphics (to be presented at SIGGRAPH 2026)</em>
+              <br>
+              
+              <a target="_blank" class="mr-2" href="https://arxiv.org/abs/2602.05081"><i class="fas fa-file-pdf"></i> Paper</a>
+
+              <p></p>
+              <p>
+                Gabor Fields introduce a novel volume representation that supports continuous frequency filtering without extra memory overhead. By selectively pruning primitives and stochastically sampling frequencies and orientations, the method improves rendering performance, reduces aliasing, and enables efficient applications such as procedural cloud rendering.
+              </p>
+            </td>
+          </tr>
+
           <tr onmouseout="puzzle_stop()" onmouseover="puzzle_start()">
             <td style="padding:40px 20px; width:25%; vertical-align:middle">
               <div class="one">
@@ -150,7 +182,7 @@
 <!--              <a class="mr-2" data-toggle="collapse" href="#bibtex_supergen" role="button" aria-expanded="false" aria-controls="bibtex_supergen"><i class="far fa-file-alt"></i> BibTeX</a>-->
               <p></p>
               <p>
-                Automatic 2D quality map generation for novel views assessing the quality of 3D scene reconstructions beyond supervised areas.
+                A novel no-reference metric to spatially assess 3D reconstructed view quality using perceptual embeddings, through an efficient patch-wise similarity computation between the training dataset and the evaluated view. Surpasses even direct reference metrics in human assessment correlation tests. We leverage it in automatic, recursive in-painting for artifact restoration.
               </p>
 
 <!--              <div class="collapse" id="bibtex_supergen">-->
