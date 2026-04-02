@@ -18,104 +18,92 @@
 
     <style>
       .p-bibtex {font-size: 12px; margin-bottom: 0px; max-width: 650px; text-align: left;}
+      .page-wrap {max-width: 800px; margin: 0 auto; padding: 0 15px;}
+      .profile-photo {width: 100%; max-width: 280px; object-fit: contain; border-radius: 50%;}
+      .project-item {padding: 40px 0;}
+      .project-thumb {width: 175px; height: 175px; object-fit: cover;}
+      .project-content {padding-top: 8px;}
+
+      @media (max-width: 767.98px) {
+        .profile-name {font-size: 40px; padding-top: 10px;}
+        .project-item {padding: 28px 0;}
+        .project-media {margin-bottom: 16px;}
+        .project-thumb,
+        .one,
+        .two {
+          margin-left: auto;
+          margin-right: auto;
+        }
+      }
     </style>
-    
   </head>
 
   <body>
-  <main class="container">
+    <main class="container">
+      <div class="page-wrap">
+        <section class="row align-items-center py-3">
+          <div class="col-md-4 text-center order-1 order-md-2 mb-3 mb-md-0">
+            <img alt="profile photo" src="images/nicolai_hermann_profile.jpg" class="profile-photo hoverZoomLink">
+          </div>
+          <div class="col-md-8 order-2 order-md-1">
+            <p class="name profile-name text-center">Nicolai Hermann</p>
 
-    <table style="width:100%;max-width:800px;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
-      <tr style="padding:0px">
-        <td style="padding:0px">
-          <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
-            <tr style="padding:0px">
-              <td style="padding:2.5%;width:63%;vertical-align:middle">
-                <p class="name" style="text-align: center;">
-                  Nicolai Hermann
-                </p>
-                <div class="text-center">
-                  <div class="d-flex justify-content-around align-items-center mb-2">
-                    <!-- <a
-                            class="btn btn-outline-secondary btn-sm px-3 ml-4 rounded-pill disabled"
-                            aria-disabled="true"
-                    >
-                      AI Researcher
-                    </a> -->
+            <div class="text-center mb-2">
+              <a class="d-inline-flex align-items-center btn btn-primary btn-sm px-3 rounded-pill" href="percussion.html" type="button">
+                Percussionist <i class="bi bi-arrow-right ms-1 pl-2"></i>
+              </a>
+            </div>
 
-                    <a class="d-inline-flex align-items-center btn btn-primary btn-sm px-3 mr-4 rounded-pill" href="percussion.html" type="button">
-                      Percussionist <i class="bi bi-arrow-right ms-1 pl-2"></i>
-                    </a>
+            <p style="text-align: justify">
+              I'm a Computer Science PhD student at the <a href="https://www.usi.ch/en" target="_blank">University of Lugano</a> (USI), working on scene representations and generation, under the supervision of <a href="https://francisengelmann.github.io/" target="_blank">Prof. Francis Engelmann</a>.
+            </p>
+            <p style="text-align: justify">
+              Previously, I've been a research assistant at <a href="https://www.pdf.inf.usi.ch/index.html" target="_blank">The Perception, Display, and Fabrication Group</a> at <a href="https://www.idsia.usi-supsi.ch/" target="_blank">IDSIA-USI</a>, in Lugano (Switzerland), where I was working on 3D scene reconstruction and representations, supervised by <a href="https://www.pdf.inf.usi.ch/people/piotr/" target="_blank">Prof. Piotr Didyk</a>.
+            </p>
 
-                  </div>
-                </div>
-                <p style="text-align: justify">
-                    I'm a Computer Science PhD student at the <a href="https://www.usi.ch/en" target="_blank">University of Lugano</a> (USI), working on scene representations and generation, under the supervision of <a href="https://francisengelmann.github.io/" target="_blank">Prof. Francis Engelmann</a>.
-                </p>
-                  <p style="text-align: justify">
-                      Previously, I've been a research assistant at <a href="https://www.pdf.inf.usi.ch/index.html" target="_blank">The Perception, Display, and Fabrication Group</a> at <a href="https://www.idsia.usi-supsi.ch/" target="_blank">IDSIA-USI</a>, in Lugano (Switzerland), where I was working on 3D scene reconstruction and representations, supervised by <a href="https://www.pdf.inf.usi.ch/people/piotr/" target="_blank">Prof. Piotr Didyk</a>.
-                  </p>
-<!--                <p>-->
-<!--                  At Google I've worked on <a href="https://www.google.com/glass/start/">Glass</a>,  <a href="https://ai.googleblog.com/2014/04/lens-blur-in-new-google-camera-app.html">Lens Blur</a>, <a href="https://ai.googleblog.com/2014/10/hdr-low-light-and-high-dynamic-range.html">HDR+</a>, <a href="https://blog.google/products/google-ar-vr/introducing-next-generation-jump/">VR</a>, <a href="https://ai.googleblog.com/2017/10/portrait-mode-on-pixel-2-and-pixel-2-xl.html">Portrait Mode</a>, <a href="https://ai.googleblog.com/2020/12/portrait-light-enhancing-portrait.html">Portrait Light</a>, and <a href="https://blog.google/products/maps/three-maps-updates-io-2022/">Maps</a>. I did my PhD at <a href="http://www.eecs.berkeley.edu/">UC Berkeley</a>, where I was advised by <a href="http://www.cs.berkeley.edu/~malik/">Jitendra Malik</a>. I've received the <a href="https://www.thecvf.com/?page_id=413#YRA">PAMI Young Researcher Award</a>.-->
-<!--                </p>-->
+            <p class="text-center mb-0">
+              <a target="_blank" href="https://scholar.google.com/citations?hl=de&user=8v0OfD8AAAAJ"><i class="ai ai-google-scholar-square ai-2x"></i></a>
+              &nbsp;
+              <a target="_blank" href="https://github.com/nihermann"><i class="fab fa-github" style="font-size:32px"></i></a>
+              &nbsp;
+              <a target="_blank" href="https://www.linkedin.com/in/nicolai-hermann-9598121b5/"><i class="fa-brands fa-linkedin" style="font-size:32px"></i></a>
+              &nbsp;
+              <a target="_blank" href="data/CV_Nicolai_Hermann.pdf"><i class="fas fa-file-alt" style="font-size:32px"></i></a>
+              &nbsp;
+              <a target="_blank" href="https://x.com/nihermann1"><i class="fab fa-twitter" style="font-size:32px"></i></a>
+              &nbsp;
+              <a target="_blank" href="mailto:hermann.nicolai@gmail.com"><i class="fa fa-envelope" style="font-size:32px"></i></a>
+            </p>
+          </div>
+        </section>
 
-                  <p align="center">
-                      <a target="_blank" href="https://scholar.google.com/citations?hl=de&user=8v0OfD8AAAAJ"><i class="ai ai-google-scholar-square ai-2x"></i></a>
-                      &nbsp;
-                      <a target="_blank" href="https://github.com/nihermann"><i class="fab fa-github" style="font-size:32px"></i></a>
-                      &nbsp;
-                      <a target="_blank" href="https://www.linkedin.com/in/nicolai-hermann-9598121b5/"><i class="fa-brands fa-linkedin" style="font-size:32px"></i></a>
-                      &nbsp;
-                      <a target="_blank" href="data/CV_Nicolai_Hermann.pdf"><i class="fas fa-file-alt" style="font-size:32px"></i></a>
-                      &nbsp;
-                      <a target="_blank" href="https://x.com/nihermann1"><i class="fab fa-twitter" style="font-size:32px"></i></a>
-                      &nbsp;
-                      <a target="_blank" href="mailto:hermann.nicolai@gmail.com"><i class="fa fa-envelope" style="font-size:32px"></i></a>
-                  </p>
-              </td>
-              <td style="padding:2.5%;width:40%;max-width:40%">
-                <img style="width:100%;max-width:100%;object-fit: contain; border-radius: 50%;" alt="profile photo" src="images/nicolai_hermann_profile.jpg" class="hoverZoomLink">
-              </td>
-            </tr>
-          </tbody></table>
-          <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
-              <tr>
-                  <td style="padding:20px;width:100%;vertical-align:middle">
-                      <h2>News</h2>
-                      <p>
-                          <ul>
-                              <li><strong>Mar 2026</strong>: Our paper <a target="_blank" href="https://arxiv.org/abs/2602.05081">Gabor Fields</a> was accepted to <a target="_blank" href="https://dl.acm.org/journal/tog">ACM Transactions on Graphics</a> to be presented at <a target="_blank" href="https://s2026.siggraph.org/">SIGGRAPH'26</a>.</li>
-                              <li><strong>Nov 2025</strong>: I will co-organize the 6<sup>th</sup> iteration of the <a href="https://opensun3d.github.io/">Open-Vocabulary 3D Scene Understanding Workshop</a> at <a href="https://cvpr.thecvf.com/Conferences/2026">CVPR'26</a>.</li>
-                              <li><strong>Sep 2025</strong>: I started my <strong>PhD</strong> in Computer Vision at the <a href="https://www.usi.ch/en">University of Lugano</a> (USI).</li>
-                              <li><strong>Oct 2025</strong>: I visited the <a href="https://geometry.stanford.edu">Guibas Lab</a> in <a href="https://www.stanford.edu">Stanford</a> to present my recent work.</li>
-                              <li><strong>Jul 2025</strong>: Our paper <a href="puzzlesim/index.html">PuzzleSim</a> was accepted at the <a href="https://iccv.thecvf.com">ICCV 2025</a> in Honolulu! 🌸</li>
-                              <li><strong>Jun 2025</strong>: My Master's thesis won the <a target="_blank" href="https://www.usi.ch/it/feeds/32067">Best Thesis Award</a> from the <a target="_blank" href="https://www.fondazionepremio.ch/">Premio Swiss Engineering Ticino</a> foundation.</li>
-                              <li><strong>Sep 2024</strong>: I defended my Master's thesis and I have received the <strong>MSc</strong> in Artificial Intelligence from <a href="https://www.usi.ch/en">USI Lugano</a>!</li>
-                              <li><strong>Sep 2023</strong>: I joined <a href="https://ethz.ch/en.html">ETH Zürich</a> for an exchange semester!
-                          </ul>
-                      </p>
-                  </td>
-              </tr>
-              <td style="padding:20px;width:100%;vertical-align:middle">
-                <h2>Research</h2>
-                <em>* denotes equal contribution</em>
+        <section class="py-2">
+          <h2>News</h2>
+          <ul class="mb-0">
+            <li><strong>Mar 2026</strong>: Our paper <a target="_blank" href="https://arxiv.org/abs/2602.05081">Gabor Fields</a> was accepted to <a target="_blank" href="https://dl.acm.org/journal/tog">ACM Transactions on Graphics</a> to be presented at <a target="_blank" href="https://s2026.siggraph.org/">SIGGRAPH'26</a>.</li>
+            <li><strong>Nov 2025</strong>: I will co-organize the 6<sup>th</sup> iteration of the <a href="https://opensun3d.github.io/">Open-Vocabulary 3D Scene Understanding Workshop</a> at <a href="https://cvpr.thecvf.com/Conferences/2026">CVPR'26</a>.</li>
+            <li><strong>Sep 2025</strong>: I started my <strong>PhD</strong> in Computer Vision at the <a href="https://www.usi.ch/en">University of Lugano</a> (USI).</li>
+            <li><strong>Oct 2025</strong>: I visited the <a href="https://geometry.stanford.edu">Guibas Lab</a> in <a href="https://www.stanford.edu">Stanford</a> to present my recent work.</li>
+            <li><strong>Jul 2025</strong>: Our paper <a href="puzzlesim/index.html">PuzzleSim</a> was accepted at the <a href="https://iccv.thecvf.com">ICCV 2025</a> in Honolulu! 🌸</li>
+            <li><strong>Jun 2025</strong>: My Master's thesis won the <a target="_blank" href="https://www.usi.ch/it/feeds/32067">Best Thesis Award</a> from the <a target="_blank" href="https://www.fondazionepremio.ch/">Premio Swiss Engineering Ticino</a> foundation.</li>
+            <li><strong>Sep 2024</strong>: I defended my Master's thesis and I have received the <strong>MSc</strong> in Artificial Intelligence from <a href="https://www.usi.ch/en">USI Lugano</a>!</li>
+            <li><strong>Sep 2023</strong>: I joined <a href="https://ethz.ch/en.html">ETH Zürich</a> for an exchange semester!</li>
+          </ul>
+        </section>
 
-<!--                <p>-->
-<!--                  I'm interested in computer vision, deep learning, generative AI, and image processing. Most of my research is about inferring the physical world (shape, motion, color, light, etc) from images, usually with radiance fields. Some papers are <span class="highlight">highlighted</span>.-->
-<!--                </p>-->
-              </td>
-            </tr>
-          </tbody></table>
+        <section class="py-4">
+          <h2>Research</h2>
+          <em>* denotes equal contribution</em>
+        </section>
 
-
-          <table style="width:100%; border-spacing:0; border-collapse:separate; margin-right:auto; margin-left:auto;"><tbody>
-          <tr>
-            <td style="padding:40px 20px; width:25%; vertical-align:middle">
+        <section>
+          <article class="row project-item">
+            <div class="col-md-3 text-center project-media">
               <div class="one">
-                <img src='images/gabor_teaser_cropped.png' style="width: 175px; height: 175px; object-fit: cover; object-position: 50% 5%;">
+                <img src="images/gabor_teaser_cropped.png" class="project-thumb" style="object-position: 50% 5%;">
               </div>
-            </td>
-            <td style="padding:40px 0 0 30px; width:75%; vertical-align:middle">
+            </div>
+            <div class="col-md-9 project-content">
               <a target="_blank" href="https://arxiv.org/abs/2602.05081">
                 <span class="papertitle">Gabor Fields: Orientation-Selective Level-of-Detail for Volume Rendering</span>
               </a>
@@ -127,36 +115,23 @@
               <br>
               <em>ACM Transactions on Graphics (to be presented at SIGGRAPH 2026)</em>
               <br>
-              
               <a target="_blank" class="mr-2" href="https://arxiv.org/abs/2602.05081"><i class="fas fa-file-pdf"></i> Paper</a>
-
-              <p></p>
-              <p>
+              <p class="mt-2 mb-0">
                 Gabor Fields introduce a novel volume representation that supports continuous frequency filtering without extra memory overhead. By selectively pruning primitives and stochastically sampling frequencies and orientations, the method improves rendering performance, reduces aliasing, and enables efficient applications such as procedural cloud rendering.
               </p>
-            </td>
-          </tr>
+            </div>
+          </article>
 
-          <tr onmouseout="puzzle_stop()" onmouseover="puzzle_start()">
-            <td style="padding:40px 20px; width:25%; vertical-align:middle">
+          <article class="row project-item" onmouseout="puzzle_stop()" onmouseover="puzzle_start()">
+            <div class="col-md-3 text-center project-media">
               <div class="one">
-                <div class="two" id='puzzle_image'>
-                  <img src='images/puzzlesim_teaser.png' style="width: 175px; height: 175px; object-fit: cover; object-position: 43% 5%;">
+                <div class="two" id="puzzle_image">
+                  <img src="images/puzzlesim_teaser.png" class="project-thumb" style="object-position: 43% 5%;">
                 </div>
-                <img src='images/puzzlesim_teaser.png' style="width: 175px; height: 175px; object-fit: cover; object-position: 43% 5%;">
+                <img src="images/puzzlesim_teaser.png" class="project-thumb" style="object-position: 43% 5%;">
               </div>
-              <script type="text/javascript">
-                function puzzle_start() {
-                  document.getElementById('puzzle_image').style.opacity = "1";
-                }
-
-                function puzzle_stop() {
-                  document.getElementById('puzzle_image').style.opacity = "0";
-                }
-                puzzle_stop()
-              </script>
-            </td>
-            <td style="padding:40px 0 0 30px; width:75%; vertical-align:middle">
+            </div>
+            <div class="col-md-9 project-content">
               <a target="_blank" href="puzzlesim/index.html">
                 <span class="papertitle">Puzzle Similarity: A Perceptually-Guided Cross-Reference Metric for Artifact Detection in 3D Scene Reconstructions</span>
               </a>
@@ -168,73 +143,50 @@
               <em>Proc. International Conference on Computer Vision (ICCV) 2025</em>
               <br>
               <a target="_blank" class="mr-2" href="puzzlesim/index.html"><i class="fa fa-cube"></i> Project Page</a>
-
               <a target="_blank" class="mr-2" href="https://arxiv.org/abs/2411.17489"><i class="fas fa-file-pdf"></i> Paper</a>
-
               <a target="_blank" class="mr-2" href="https://github.com/nihermann/PuzzleSim"><i class="fa fa-code"></i> Code</a>
-
               <a target="_blank" class="mr-2" href="https://huggingface.co/datasets/nihermann/annotated-3DGS-artifacts"><i class="fa fa-database"></i> Data</a>
-
               <a target="_blank" class="mr-2" href="puzzlesim/data/Puzzle_Similarity_Supplemental.pdf"><i class="fa fa-file-circle-plus"></i> Supplemental</a>
               <a target="_blank" class="mr-2" href="puzzlesim/data/ICCV Poster v2.pdf"><i class="fa fa-file-image"></i> Poster</a>
               <a target="_blank" class="mr-2" href="https://www.youtube.com/watch?v=u24Wz15NYoY"><i class="fab fa-youtube"></i> Demo</a>
-<!--              <a class="mr-2" data-toggle="collapse" href="#bibtex_supergen" role="button" aria-expanded="false" aria-controls="bibtex_supergen"><i class="far fa-file-alt"></i> BibTeX</a>-->
-              <p></p>
-              <p>
+              <p class="mt-2 mb-0">
                 A novel no-reference metric to spatially assess 3D reconstructed view quality using perceptual embeddings, through an efficient patch-wise similarity computation between the training dataset and the evaluated view. Surpasses even direct reference metrics in human assessment correlation tests. We leverage it in automatic, recursive in-painting for artifact restoration.
               </p>
+            </div>
+          </article>
 
-<!--              <div class="collapse" id="bibtex_supergen">-->
-<!--                <div class="card card-body">-->
-<!--<pre class="p-bibtex">@article{engelmann2025supergen,-->
-<!--  title   = {{SuperGen: Introducing Spatial Control to 3D Generative Modeling}},-->
-<!--  author  = {Francis Engelmann, Elisabetta Fedele, Ian Huang, Or Litany, Marc Pollefeys, Leonidas Guibas},-->
-<!--  journal = {arXiv preprint},-->
-<!--  year    = {2025}-->
-<!--}</pre>-->
-<!--                </div>-->
-<!--              </div>-->
-
-            </td>
-          </tr>
-
-          <tr>
-            <td style="padding:40px 20px; width:25%; vertical-align:middle">
+          <article class="row project-item">
+            <div class="col-md-3 text-center project-media">
               <div class="one">
-                <img src='images/thesis_front.png' style="width: 175px; height: 175px; object-fit: cover; object-position: 50% 5%;">
+                <img src="images/thesis_front.png" class="project-thumb" style="object-position: 50% 5%;">
               </div>
-            </td>
-            <td style="padding:40px 0 0 30px; width:75%; vertical-align:middle">
+            </div>
+            <div class="col-md-9 project-content">
               <a target="_blank" href="https://thesis.bul.sbu.usi.ch/theses/2340-2324Hermann/pdf?1730797532">
                 <span class="papertitle">Perceptually-Driven Neural Inpainting for Seamless 3D Reconstructions</span>
               </a>
               <br>
               Supervised by
-               <a target="_blank" href="https://www.pdf.inf.usi.ch/people/piotr/">Prof. Piotr Didyk</a>,
+              <a target="_blank" href="https://www.pdf.inf.usi.ch/people/piotr/">Prof. Piotr Didyk</a>,
               <a target="_blank" href="https://arcanous98.github.io/">Jorge Condor</a>
               <br>
               <em>Awarded the "<em style="color: red">Best Thesis Award</em>" from the <a target="_blank" href="https://www.fondazionepremio.ch/">Premio Swiss Engineering Ticino</a> foundation.</em>
               <br>
-
               <a target="_blank" class="mr-2" href="https://thesis.bul.sbu.usi.ch/theses/2340-2324Hermann/pdf?1730797532"><i class="fas fa-book"></i> Thesis</a>
               <a target="_blank" class="mr-2" href="https://www.usi.ch/it/feeds/32067"><i class="fas fa-medal"></i> Announcement</a>
-
-              <p></p>
-              <p>
+              <p class="mt-2 mb-0">
                 In my master’s thesis, I improved novel Scene Reconstruction methods, such as Gaussian Splatting. I introduced a new approach that assesses reconstruction quality by leveraging the input multiview content as priors to evaluate novel views. I then demonstrated the method’s effectiveness by devising a strategy that hallucinates incorrectly reconstructed parts of a scene.
               </p>
-            </td>
-          </tr>
+            </div>
+          </article>
 
-          <tr>
-            <td style="padding:40px 20px; width:25%; vertical-align:middle">
+          <article class="row project-item">
+            <div class="col-md-3 text-center project-media">
               <div class="one">
-                <div class="two">
-                   <img src='images/ploygcl_profile.png' style="width: 175px; height: 175px; object-fit: cover; object-position: 50% 5%;">
-                </div>
+                <img src="images/ploygcl_profile.png" class="project-thumb" style="object-position: 50% 5%;">
               </div>
-            </td>
-            <td style="padding:40px 0 0 30px; width:75%; vertical-align:middle">
+            </div>
+            <div class="col-md-9 project-content">
               <a target="_blank" href="data/Reproducibility_Challenge_PolyGCL.pdf">
                 <span class="papertitle">Reproducibility Challenge—PolyGCL: GRAPH CONTRASTIVE LEARNING via Learnable Spectral Polynomial Filters</span>
               </a>
@@ -243,54 +195,38 @@
               <a target="_blank" href="https://www.linkedin.com/in/michele-cattaneo-614527210/">Michele Cattaneo</a>,
               <a target="_blank" href="https://www.linkedin.com/in/oliver-tryding-954171266/">Oliver Tryding</a>
               <br>
-
               <a target="_blank" class="mr-2" href="data/Reproducibility_Challenge_PolyGCL.pdf"><i class="fa fa-file-pdf"></i> Project Report</a>
               <a target="_blank" class="mr-2" href="https://github.com/OliverTryding/-RE-POLYGCL"><i class="fa fa-code"></i> Reproduced Code</a>
               <a target="_blank" class="mr-2" href="https://wandb.ai/nihermann/RE-PolyGCL"><i class="fa fa-braille"></i> WandB</a>
               <a target="_blank" class="mr-2" href="https://openreview.net/pdf?id=y21ZO6M86t"><i class="fa fa-file-pdf"></i> PolyGLC</a>
               <a target="_blank" class="mr-2" href="https://github.com/ChenJY-Count/PolyGCL"><i class="fa fa-code"></i> PolyGCL Code</a>
-
-              <p></p>
-              <p>
+              <p class="mt-2 mb-0">
                 In this paper, we replicate PolyGCL, which frames self-supervised graph contrastive learning as a spectral-polynomial fusion of high- and low-pass graph filters. Our study mostly reproduced the reported gains on both homophilic and heterophilic graphs—confirming its ability to learn expressive node embeddings—while noting that results still depend on careful hyper-parameter calibration relying on labeled data, compromising the self-supervised approach.
               </p>
-            </td>
-          </tr>
+            </div>
+          </article>
 
-          <tr onmouseout="mc_stop()" onmouseover="mc_start()">
-            <td style="padding:40px 20px; width:25%; vertical-align:middle">
+          <article class="row project-item" onmouseout="mc_stop()" onmouseover="mc_start()">
+            <div class="col-md-3 text-center project-media">
               <div class="one">
-                <div class="two" id='mc_image'>
-                  <video id="mc_video"
-                         src="images/mc_localization.mov"
-                         width="175" height="175"
-                         muted playsinline preload="metadata"
-                         style="object-fit:cover;object-position:50% 5%;position:absolute;top:0;left:0;opacity:0;transition:opacity .2s">
-                  <!-- Fallback text -->
-                  Your browser doesn’t support embedded video.
+                <div class="two">
+                  <video
+                    id="mc_video"
+                    src="images/mc_localization.mov"
+                    width="175"
+                    height="175"
+                    muted
+                    playsinline
+                    preload="metadata"
+                    style="object-fit:cover;object-position:50% 5%;position:absolute;top:0;left:0;opacity:0;transition:opacity .2s"
+                  >
+                    Your browser doesn’t support embedded video.
                   </video>
                 </div>
-                <img src='images/mc_localization.png' style="width: 175px; height: 175px; object-fit: cover; object-position: 50% 5%;">
+                <img src="images/mc_localization.png" class="project-thumb" style="object-position: 50% 5%;">
               </div>
-              <script type="text/javascript">
-                const vid = document.getElementById('mc_video');
-
-                function mc_start () {
-                  // show + start from the beginning
-                  vid.currentTime = 0;
-                  vid.play();
-                  vid.style.opacity = '1';
-                }
-
-                function mc_stop () {
-                  // hide + pause to save CPU
-                  vid.pause();
-                  vid.currentTime = 0;      // reset so it restarts next hover
-                  vid.style.opacity = '0';
-                }
-              </script>
-            </td>
-            <td style="padding:40px 0 0 30px; width:75%; vertical-align:middle">
+            </div>
+            <div class="col-md-9 project-content">
               <a target="_blank" href="data/Markov_Localization___Final_Robotics_Project.pdf">
                 <span class="papertitle">Robotics: Markov Localization and Monte Carlo Localization</span>
               </a>
@@ -299,26 +235,21 @@
               <a target="_blank" href="https://www.linkedin.com/in/michele-cattaneo-614527210/">Michele Cattaneo</a>,
               <a target="_blank" href="https://www.linkedin.com/in/oliver-tryding-954171266/">Oliver Tryding</a>
               <br>
-
               <a target="_blank" class="mr-2" href="data/Markov_Localization___Final_Robotics_Project.pdf"><i class="fa fa-file-pdf"></i> Project Report</a>
               <a target="_blank" class="mr-2" href="https://github.com/MicheleCattaneo/Markov_and_Monte_Carlo_Localization"><i class="fa fa-code"></i> Code</a>
-
-              <p></p>
-              <p>
+              <p class="mt-2 mb-0">
                 In this project, we built a small simulator and implemented Markov localization to maintain a full probability grid of robot poses after each motion and sensor reading. For larger or continuous maps, we switched to Monte Carlo localization, replacing the exhaustive grid with a compact set of weighted particles (see blue points in the animation).
               </p>
-            </td>
-          </tr>
+            </div>
+          </article>
 
-          <tr>
-            <td style="padding:40px 20px; width:25%; vertical-align:middle">
+          <article class="row project-item">
+            <div class="col-md-3 text-center project-media">
               <div class="one">
-                <div class="two">
-                  <img src='images/avatar%20all.png' style="width: 175px; height: 175px; object-fit: cover; object-position: -1% 5%;">
-                </div>
+                <img src="images/avatar%20all.png" class="project-thumb" style="object-position: -1% 5%;">
               </div>
-            </td>
-            <td style="padding:40px 0 0 30px; width:75%; vertical-align:middle">
+            </div>
+            <div class="col-md-9 project-content">
               <a target="_blank" href="data/Avatar__The_Legend_of_VR.pdf">
                 <span class="papertitle">Avatar: The Legend of VR</span>
               </a>
@@ -329,22 +260,21 @@
               <a target="_blank" href="https://www.linkedin.com/in/jule-k%C3%B6rner-1416161a2/">Jule Körner</a>,
               <a target="_blank" href="https://www.linkedin.com/in/janeke-nemitz-5a8a301bb/">Janeke Nemitz</a>
               <br>
-              <a target="_blank" class="mr-2" href="data/Avatar__The_Legend_of_VR.pdf"><i class="fa fa-file-pdf"></i>  Project Report</a>
+              <a target="_blank" class="mr-2" href="data/Avatar__The_Legend_of_VR.pdf"><i class="fa fa-file-pdf"></i> Project Report</a>
               <a target="_blank" class="mr-2" href="https://github.com/nihermann/Avatar-Legend-of-Vr2"><i class="fa fa-code"></i> Code</a>
-              <p></p>
-              <p>
+              <p class="mt-2 mb-0">
                 In this study, we explore whether users prefer interacting with virtual avatars that align with their visual preferences. In a VR experiment with 13 participants we found that avatar choices were influenced primarily by color and style. Results indicate a clear preference for visually congruent avatars.
               </p>
-            </td>
-          </tr>
+            </div>
+          </article>
 
-          <tr>
-            <td style="padding:40px 20px; width:25%; vertical-align:middle">
+          <article class="row project-item">
+            <div class="col-md-3 text-center project-media">
               <div class="one">
-                <img src='images/pokemon_evolution.gif' style="width: 175px; height: 175px; object-fit: cover; object-position: 50% 5%;">
+                <img src="images/pokemon_evolution.gif" class="project-thumb" style="object-position: 50% 5%;">
               </div>
-            </td>
-            <td style="padding:40px 0 0 30px; width:75%; vertical-align:middle">
+            </div>
+            <div class="col-md-9 project-content">
               <a target="_blank" href="data/Pokegans.pdf">
                 <span class="papertitle">Pokégans: Using Generative Adversarial Networks to Create the Next Generation of Pokémons</span>
               </a>
@@ -352,79 +282,94 @@
               Nicolai Hermann,
               <a target="_blank" href="https://www.linkedin.com/in/michael-h%C3%BCppe-1053b61a1">Michael Hüppe</a>
               <br>
-
               <a target="_blank" class="mr-2" href="data/Pokegans.pdf"><i class="fa fa-file-pdf"></i> Project Report</a>
               <a target="_blank" class="mr-2" href="https://github.com/nihermann/Pokemaenner"><i class="fa fa-code"></i> Code</a>
-
-              <p></p>
-              <p>
+              <p class="mt-2 mb-0">
                 In this paper, we present a compact pipeline that trains a bespoke generative adversarial network to create convincing “Fakémon” sprites. Using a curated, uniformly pre-processed corpus of original Pokémon graphics, the model learns franchise-specific aesthetics and outputs novel, game-ready creatures. The paper details data acquisition and network design, showcases fan-project applications, and highlights future optimisation paths to boost fidelity and training efficiency.
               </p>
-            </td>
-          </tr>
+            </div>
+          </article>
 
-          <tr>
-            <td style="padding:40px 20px; width:25%; vertical-align:middle">
+          <article class="row project-item">
+            <div class="col-md-3 text-center project-media">
               <div class="one">
-                <div class="two">
-                  <img src='images/website_qr.png' id="qr-image" style="width: 175px; height: 175px; object-fit: cover; object-position: 50% 5%;">
-                </div>
+                <img src="images/website_qr.png" id="qr-image" class="project-thumb" style="object-position: 50% 5%;">
               </div>
-            </td>
-            <td style="padding:28px 0 0 30px; width:75%; vertical-align:middle">
-                <span class="h5">Mini Project: Create your own QR Code</span>
-              <br>
-              <p></p>
-              <p>
-              <div class="mb-3">
+            </div>
+            <div class="col-md-9 project-content">
+              <span class="h5">Mini Project: Create your own QR Code</span>
+              <div class="my-3">
                 <input oninput="generateQRCode()" onchange="generateQRCode()" type="text" id="qrcode-input" value="https://nihermann.github.io/" class="form-control" style="max-width: 300px;">
                 <div class="invalid-feedback">Can't create empty qr codes.</div>
               </div>
               <button id="qr-download-btn" onclick="downloadImage()" class="btn btn-success">Download PNG</button>
               <button id="qr-download-svg-btn" onclick="downloadSVG()" class="btn btn-success ml-2">Download SVG</button>
-              </p>
-            </td>
-          </tr>
-          <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.4.4/qrcode.min.js" integrity="sha512-6x997BOv0e4O+G45Cwr4PZMYXP0ATChLcSob5IB6DPpXvDfRDMBFClXOg5ahmIVBoAf2tnsENpkHRJckceZiwQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-          <script>
-            const qr_url = document.getElementById('qrcode-input');
-            const qrcodeImage = document.getElementById('qr-image');
-            const downloadButton = document.getElementById('qr-download-btn');
-            const downloadSvgButton = document.getElementById('qr-download-svg-btn');
+            </div>
+          </article>
+        </section>
+      </div>
+    </main>
 
-            async function generateQRCode() {
-              if (qr_url.value === "") {
-                qr_url.classList.add("is-invalid")
-                downloadButton.disabled = true;
-                downloadSvgButton.disabled = true;
-                console.log("QR code generation failed: URL is empty");
-                return;
-              } else {
-                qr_url.classList.remove("is-invalid")
-                downloadButton.disabled = false;
-                downloadSvgButton.disabled = false;
-              }
-              qrcodeImage.src = await QRCode.toDataURL(qr_url.value);
-            }
-            function downloadImage() {
-              const link = document.createElement('a');
-              link.href = qrcodeImage.src;
-              link.download = `${qr_url.value.replace(/https?:\/\//, '').replace(/\//g, '_')}.png`;
-              link.click();
-            }
-            async function downloadSVG() {
-              const link = document.createElement('a');
-              const qr = await QRCode.toString(qr_url.value, {type: "svg"});
-              link.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(qr);
-              link.download = `${qr_url.value.replace(/https?:\/\//, '').replace(/\//g, '_')}.svg`;
-              link.click();
-            }
-          </script>
-          </tbody></table>
-        </td>
-      </tr>
-    </table>
-  </main>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.4.4/qrcode.min.js" integrity="sha512-6x997BOv0e4O+G45Cwr4PZMYXP0ATChLcSob5IB6DPpXvDfRDMBFClXOg5ahmIVBoAf2tnsENpkHRJckceZiwQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+      const qr_url = document.getElementById('qrcode-input');
+      const qrcodeImage = document.getElementById('qr-image');
+      const downloadButton = document.getElementById('qr-download-btn');
+      const downloadSvgButton = document.getElementById('qr-download-svg-btn');
+      const vid = document.getElementById('mc_video');
 
+      function puzzle_start() {
+        document.getElementById('puzzle_image').style.opacity = '1';
+      }
+
+      function puzzle_stop() {
+        document.getElementById('puzzle_image').style.opacity = '0';
+      }
+
+      function mc_start() {
+        vid.currentTime = 0;
+        vid.play();
+        vid.style.opacity = '1';
+      }
+
+      function mc_stop() {
+        vid.pause();
+        vid.currentTime = 0;
+        vid.style.opacity = '0';
+      }
+
+      async function generateQRCode() {
+        if (qr_url.value === '') {
+          qr_url.classList.add('is-invalid');
+          downloadButton.disabled = true;
+          downloadSvgButton.disabled = true;
+          return;
+        }
+
+        qr_url.classList.remove('is-invalid');
+        downloadButton.disabled = false;
+        downloadSvgButton.disabled = false;
+        qrcodeImage.src = await QRCode.toDataURL(qr_url.value);
+      }
+
+      function downloadImage() {
+        const link = document.createElement('a');
+        link.href = qrcodeImage.src;
+        link.download = `${qr_url.value.replace(/https?:\/\//, '').replace(/\//g, '_')}.png`;
+        link.click();
+      }
+
+      async function downloadSVG() {
+        const link = document.createElement('a');
+        const qr = await QRCode.toString(qr_url.value, { type: 'svg' });
+        link.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(qr);
+        link.download = `${qr_url.value.replace(/https?:\/\//, '').replace(/\//g, '_')}.svg`;
+        link.click();
+      }
+
+      puzzle_stop();
+      mc_stop();
+      generateQRCode();
+    </script>
   </body>
 </html>
