@@ -24,6 +24,19 @@
       .project-thumb {width: 175px; height: 175px; object-fit: cover;}
       .project-content {padding-top: 8px;}
       .project-description {text-align: justify;}
+      .qr-tools {
+        width: 100%;
+        max-width: 410px;
+      }
+      .qr-input {
+        max-width: 100% !important;
+      }
+      .qr-actions {
+        display: flex;
+        justify-content: flex-start;
+        gap: 8px;
+        width: 100%;
+      }
 
       @media (max-width: 767.98px) {
         .profile-name {font-size: 40px; padding-top: 10px;}
@@ -34,6 +47,26 @@
         .two {
           margin-left: auto;
           margin-right: auto;
+        }
+        .qr-tools {
+          max-width: 100%;
+        }
+      }
+
+        @media (min-width: 768px) and (max-width: 991.98px) {
+          .project-media {
+            padding-right: 36px;
+          }
+
+          .project-content {
+            padding-left: 36px;
+          }
+        }
+
+      @media (max-width: 390px) {
+        .qr-actions {
+          justify-content: space-between;
+          gap: 0;
         }
       }
     </style>
@@ -298,13 +331,17 @@
               </div>
             </div>
             <div class="col-md-9 project-content">
-              <span class="h5">Mini Project: Create your own QR Code</span>
-              <div class="my-3">
-                <input oninput="generateQRCode()" onchange="generateQRCode()" type="text" id="qrcode-input" value="https://nihermann.github.io/" class="form-control" style="max-width: 300px;">
-                <div class="invalid-feedback">Can't create empty qr codes.</div>
+              <div class="qr-tools">
+                <span class="h5 d-block">Mini Project: Create your own QR Code</span>
+                <div class="my-3">
+                  <input oninput="generateQRCode()" onchange="generateQRCode()" type="text" id="qrcode-input" value="https://nihermann.github.io/" class="form-control qr-input">
+                  <div class="invalid-feedback">Can't create empty qr codes.</div>
+                </div>
+                <div class="qr-actions">
+                  <button id="qr-download-btn" onclick="downloadImage()" class="btn btn-success">Download PNG</button>
+                  <button id="qr-download-svg-btn" onclick="downloadSVG()" class="btn btn-success">Download SVG</button>
+                </div>
               </div>
-              <button id="qr-download-btn" onclick="downloadImage()" class="btn btn-success">Download PNG</button>
-              <button id="qr-download-svg-btn" onclick="downloadSVG()" class="btn btn-success ml-2">Download SVG</button>
             </div>
           </article>
         </section>
