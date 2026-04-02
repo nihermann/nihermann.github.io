@@ -23,6 +23,7 @@
       .project-item {padding: 40px 0;}
       .project-thumb {width: 175px; height: 175px; object-fit: cover;}
       .project-content {padding-top: 8px;}
+      .project-description {text-align: justify;}
 
       @media (max-width: 767.98px) {
         .profile-name {font-size: 40px; padding-top: 10px;}
@@ -116,7 +117,7 @@
               <em>ACM Transactions on Graphics (to be presented at SIGGRAPH 2026)</em>
               <br>
               <a target="_blank" class="mr-2" href="https://arxiv.org/abs/2602.05081"><i class="fas fa-file-pdf"></i> Paper</a>
-              <p class="mt-2 mb-0">
+              <p class="mt-2 mb-0 project-description">
                 Gabor Fields introduce a novel volume representation that supports continuous frequency filtering without extra memory overhead. By selectively pruning primitives and stochastically sampling frequencies and orientations, the method improves rendering performance, reduces aliasing, and enables efficient applications such as procedural cloud rendering.
               </p>
             </div>
@@ -149,7 +150,7 @@
               <a target="_blank" class="mr-2" href="puzzlesim/data/Puzzle_Similarity_Supplemental.pdf"><i class="fa fa-file-circle-plus"></i> Supplemental</a>
               <a target="_blank" class="mr-2" href="puzzlesim/data/ICCV Poster v2.pdf"><i class="fa fa-file-image"></i> Poster</a>
               <a target="_blank" class="mr-2" href="https://www.youtube.com/watch?v=u24Wz15NYoY"><i class="fab fa-youtube"></i> Demo</a>
-              <p class="mt-2 mb-0">
+              <p class="mt-2 mb-0 project-description">
                 A novel no-reference metric to spatially assess 3D reconstructed view quality using perceptual embeddings, through an efficient patch-wise similarity computation between the training dataset and the evaluated view. Surpasses even direct reference metrics in human assessment correlation tests. We leverage it in automatic, recursive in-painting for artifact restoration.
               </p>
             </div>
@@ -174,7 +175,7 @@
               <br>
               <a target="_blank" class="mr-2" href="https://thesis.bul.sbu.usi.ch/theses/2340-2324Hermann/pdf?1730797532"><i class="fas fa-book"></i> Thesis</a>
               <a target="_blank" class="mr-2" href="https://www.usi.ch/it/feeds/32067"><i class="fas fa-medal"></i> Announcement</a>
-              <p class="mt-2 mb-0">
+              <p class="mt-2 mb-0 project-description">
                 In my master’s thesis, I improved novel Scene Reconstruction methods, such as Gaussian Splatting. I introduced a new approach that assesses reconstruction quality by leveraging the input multiview content as priors to evaluate novel views. I then demonstrated the method’s effectiveness by devising a strategy that hallucinates incorrectly reconstructed parts of a scene.
               </p>
             </div>
@@ -200,7 +201,7 @@
               <a target="_blank" class="mr-2" href="https://wandb.ai/nihermann/RE-PolyGCL"><i class="fa fa-braille"></i> WandB</a>
               <a target="_blank" class="mr-2" href="https://openreview.net/pdf?id=y21ZO6M86t"><i class="fa fa-file-pdf"></i> PolyGLC</a>
               <a target="_blank" class="mr-2" href="https://github.com/ChenJY-Count/PolyGCL"><i class="fa fa-code"></i> PolyGCL Code</a>
-              <p class="mt-2 mb-0">
+              <p class="mt-2 mb-0 project-description">
                 In this paper, we replicate PolyGCL, which frames self-supervised graph contrastive learning as a spectral-polynomial fusion of high- and low-pass graph filters. Our study mostly reproduced the reported gains on both homophilic and heterophilic graphs—confirming its ability to learn expressive node embeddings—while noting that results still depend on careful hyper-parameter calibration relying on labeled data, compromising the self-supervised approach.
               </p>
             </div>
@@ -237,7 +238,7 @@
               <br>
               <a target="_blank" class="mr-2" href="data/Markov_Localization___Final_Robotics_Project.pdf"><i class="fa fa-file-pdf"></i> Project Report</a>
               <a target="_blank" class="mr-2" href="https://github.com/MicheleCattaneo/Markov_and_Monte_Carlo_Localization"><i class="fa fa-code"></i> Code</a>
-              <p class="mt-2 mb-0">
+              <p class="mt-2 mb-0 project-description">
                 In this project, we built a small simulator and implemented Markov localization to maintain a full probability grid of robot poses after each motion and sensor reading. For larger or continuous maps, we switched to Monte Carlo localization, replacing the exhaustive grid with a compact set of weighted particles (see blue points in the animation).
               </p>
             </div>
@@ -262,7 +263,7 @@
               <br>
               <a target="_blank" class="mr-2" href="data/Avatar__The_Legend_of_VR.pdf"><i class="fa fa-file-pdf"></i> Project Report</a>
               <a target="_blank" class="mr-2" href="https://github.com/nihermann/Avatar-Legend-of-Vr2"><i class="fa fa-code"></i> Code</a>
-              <p class="mt-2 mb-0">
+              <p class="mt-2 mb-0 project-description">
                 In this study, we explore whether users prefer interacting with virtual avatars that align with their visual preferences. In a VR experiment with 13 participants we found that avatar choices were influenced primarily by color and style. Results indicate a clear preference for visually congruent avatars.
               </p>
             </div>
@@ -284,7 +285,7 @@
               <br>
               <a target="_blank" class="mr-2" href="data/Pokegans.pdf"><i class="fa fa-file-pdf"></i> Project Report</a>
               <a target="_blank" class="mr-2" href="https://github.com/nihermann/Pokemaenner"><i class="fa fa-code"></i> Code</a>
-              <p class="mt-2 mb-0">
+              <p class="mt-2 mb-0 project-description">
                 In this paper, we present a compact pipeline that trains a bespoke generative adversarial network to create convincing “Fakémon” sprites. Using a curated, uniformly pre-processed corpus of original Pokémon graphics, the model learns franchise-specific aesthetics and outputs novel, game-ready creatures. The paper details data acquisition and network design, showcases fan-project applications, and highlights future optimisation paths to boost fidelity and training efficiency.
               </p>
             </div>
