@@ -66,8 +66,8 @@
                           Piotr Didyk
                         </a>
                     </li>
-                    <br>IDSIA-USI
                 </ul>
+                <div class="affiliation">IDSIA-USI</div>
             </div>
         </div>
 
@@ -374,6 +374,10 @@
         .puzzlesim-explainer,
         .qualitative-comparison {
             margin-bottom: 34px;
+        }
+
+        .affiliation {
+            text-align: center;
         }
 
         .metric-flow {
@@ -687,10 +691,13 @@
         }
 
         .map-grid img {
-            aspect-ratio: 1237 / 822;
             display: block;
-            object-fit: cover;
-            width: 100%;
+            height: auto;
+            margin: 10px auto 0;
+            max-height: 95px;
+            max-width: calc(100% - 20px);
+            object-fit: contain;
+            width: auto;
         }
 
         .map-card span {
@@ -703,36 +710,22 @@
 
         /* Responsive for cols */
         @media (max-width: 991px) {
-            .metric-flow {
-                display: grid;
-                grid-template-columns: 1fr;
-            }
-
-            .metric-connector {
-                display: none;
-            }
-
-            .map-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .metric-note-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width:767px) {
             html,
             body {
                 overflow-x: hidden;
             }
 
             #main {
+                box-sizing: border-box;
                 max-width: 100%;
                 min-width: 0;
                 padding-left: 14px;
                 padding-right: 14px;
                 width: auto !important;
+            }
+
+            #main * {
+                box-sizing: border-box;
             }
 
             body .container {
@@ -746,14 +739,24 @@
             }
 
             #main [class*="col-"] {
+                float: none !important;
                 margin-left: 0 !important;
                 padding-left: 0;
                 padding-right: 0;
                 width: 100% !important;
             }
 
+            #main p,
+            #main h2,
+            #main h3,
+            #main h4,
+            #main a,
+            #main span {
+                overflow-wrap: break-word;
+            }
+
             #main h2 {
-                font-size: 24px;
+                font-size: 22px;
                 line-height: 1.22;
                 overflow-wrap: anywhere;
             }
@@ -763,6 +766,113 @@
                 margin-top: 8px;
             }
 
+            #main .list-inline {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                margin-left: 0;
+                margin-right: 0;
+                row-gap: 4px;
+            }
+
+            #main .list-inline > li {
+                margin-left: 6px;
+                margin-right: 6px;
+            }
+
+            #main .affiliation {
+                display: block;
+                text-align: center;
+                width: 100%;
+            }
+
+            #main .nav.nav-pills.nav-justified {
+                display: grid;
+                gap: 10px 8px;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                margin: 18px auto 24px;
+                max-width: 360px;
+            }
+
+            #main .nav.nav-pills.nav-justified:before,
+            #main .nav.nav-pills.nav-justified:after {
+                display: none;
+            }
+
+            #main .nav.nav-pills.nav-justified > li {
+                display: block !important;
+                float: none !important;
+                width: auto !important;
+            }
+
+            #main .nav.nav-pills.nav-justified > li > a {
+                border-radius: 6px;
+                margin-bottom: 0;
+                min-height: 86px;
+                padding: 8px 4px 6px;
+            }
+
+            #main .nav.nav-pills.nav-justified img {
+                height: 32px !important;
+                margin-bottom: 4px !important;
+                max-width: 58px;
+                object-fit: contain;
+            }
+
+            #main .nav.nav-pills.nav-justified h4 {
+                font-size: 13px;
+                line-height: 1.16;
+                margin: 4px 0 0;
+                word-break: break-word;
+            }
+
+            .metric-flow {
+                display: grid;
+                grid-template-columns: 1fr;
+            }
+
+            .metric-connector {
+                display: none;
+            }
+
+            .map-grid {
+                column-gap: 10px;
+                row-gap: 8px;
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+                margin-top: 10px;
+            }
+
+            .metric-note-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .map-card {
+                border-radius: 6px;
+            }
+
+            .map-card:hover,
+            .map-card:focus {
+                transform: none;
+            }
+
+            .map-card img {
+                height: auto;
+                margin-top: 6px;
+                max-height: 42px;
+                max-width: calc(100% - 8px);
+                object-fit: contain;
+                width: auto;
+            }
+
+            .map-card span {
+                font-size: 10px;
+                line-height: 1.12;
+                min-height: 28px;
+                padding: 5px 2px 6px;
+            }
+        }
+
+        @media (max-width:767px) {
             #main .row[style*="margin-bottom: 30px"] > div > div {
                 padding: 22px 20px 20px !important;
             }
@@ -771,12 +881,16 @@
                 text-align: left;
             }
 
+            .comparison-block {
+                margin-bottom: 28px !important;
+            }
+
             .col-sm-6 { width:100%; display:block; margin-bottom:16px; }
         }
 
         @media (max-width: 520px) {
             .map-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(4, minmax(0, 1fr));
             }
         }
         </style>
