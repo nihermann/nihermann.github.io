@@ -17,7 +17,7 @@
     <meta property="og:image:height" content="840">
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://nihermann.github.io/puzzlesim/index.html"/>
-    <meta property="og:title" content="Puzzle Similiarty: A Perceptually-guided Cross-Reference Metric for Artifact Detection in 3D Scene Reconstructions" />
+    <meta property="og:title" content="Puzzle Similarity: A Perceptually-guided Cross-Reference Metric for Artifact Detection in 3D Scene Reconstructions" />
     <meta property="og:description" content="Modern reconstruction techniques can effectively model complex 3D scenes from sparse 2D views. However, automatically assessing the quality of novel views and identifying artifacts is challenging due to the lack of ground truth images and the limitations of no-reference image metrics in predicting detailed artifact maps. The absence of such quality metrics hinders accurate predictions of the quality of generated views and limits the adoption of post-processing techniques, such as inpainting, to enhance reconstruction quality. In this work, we propose a new no-reference metric, Puzzle Similarity, which is designed to localize artifacts in novel views. Our approach utilizes image patch statistics from the input views to establish a scene-specific distribution that is later used to identify poorly reconstructed regions in the novel views. We test and evaluate our method in the context of 3D reconstruction; to this end, we collected a novel dataset of human quality assessment in unseen reconstructed views. Through this dataset, we demonstrate that our method can not only successfully localize artifacts in novel views, correlating with human assessment, but do so without direct references. Surprisingly, our metric outperforms both no-reference metrics and popular full-reference image metrics. We can leverage our new metric to enhance applications like automatic image restoration, guided acquisition, or 3D reconstruction from sparse inputs." />
 
 
@@ -43,7 +43,8 @@
     <div class="container" id="main">
         <div class="row">
             <h2 class="col-md-12 text-center">
-                <b>Puzzle Similarity</b>: A Perceptually-Guided Cross-Reference Metric<br>for Artifact Detection in 3D Scene Reconstructions</br>
+                <b>Puzzle Similarity</b>: A Perceptually-Guided Cross-Reference Metric<br>for Artifact Detection in 3D Scene Reconstructions
+                <br>
                 <small>International Conference on Computer Vision (ICCV) 2025.</small>
             </h2>
         </div>
@@ -85,6 +86,7 @@
                             <img src="img/youtube_icon.png" height="45px" style="margin-bottom: 10px;">
                                 <h4><strong>Video</strong></h4>
                             </a>
+                        </li>
                         <li>
                             <a target="_blank" href="https://github.com/nihermann/PuzzleSim">
                             <img src="img/github.png" height="45px" style="margin-bottom: 10px;">
@@ -174,7 +176,810 @@
                 </div>
             </div>
         </div>
-<br>
+        <br>
+
+        <div class="row puzzlesim-explainer">
+            <div class="col-md-8 col-md-offset-2">
+                <h3>How PuzzleSim Works</h3>
+                <p class="text-justify">
+                    PuzzleSim localizes artifacts in a novel rendered view without needing an aligned ground-truth image. Instead, it uses the training views of the same scene as a scene-specific reference distribution. The intuition is simple: if a patch in the novel view looks like patches that already appeared somewhere in the training views, it is probably plausible; if it looks unlike everything in that scene, it is likely an artifact.
+                </p>
+                <p class="text-justify">
+                    We describe this with a puzzle analogy. Imagine cutting all training views into many perceptual puzzle pieces, shuffling them together, and trying to reassemble the novel view from that pile. Well-reconstructed regions should have matching pieces. Broken, blurry, or hallucinated regions should be hard to explain from the available pieces.
+                </p>
+
+                <div class="metric-flow" aria-label="PuzzleSim metric flow">
+                    <div class="metric-step">
+                        <div class="step-label">1</div>
+                        <div class="step-art reference-stack">
+                            <span></span><span></span><span></span>
+                        </div>
+                        <strong>Training views</strong>
+                        <p>Use the original scene captures as unaligned references.</p>
+                    </div>
+                    <div class="metric-connector">&rarr;</div>
+                    <div class="metric-step">
+                        <div class="step-label">2</div>
+                        <div class="step-art patch-bank">
+                            <span></span><span></span><span></span><span></span><span></span><span></span>
+                            <span></span><span></span><span></span><span></span><span></span><span></span>
+                        </div>
+                        <strong>Perceptual patches</strong>
+                        <p>Run a pretrained CNN and treat each feature-map location as a patch embedding.</p>
+                    </div>
+                    <div class="metric-connector">&rarr;</div>
+                    <div class="metric-step">
+                        <div class="step-label">3</div>
+                        <div class="step-art match-strip">
+                            <span class="query-patch"></span>
+                            <span class="match-line"></span>
+                            <span class="best-patch"></span>
+                        </div>
+                        <strong>Best match</strong>
+                        <p>For every novel-view patch embedding, find its closest match anywhere in the reference set.</p>
+                    </div>
+                    <div class="metric-connector">&rarr;</div>
+                    <div class="metric-step">
+                        <div class="step-label">4</div>
+                        <div class="step-art heatmap-icon">
+                            <span></span><span></span><span></span><span></span>
+                        </div>
+                        <strong>Artifact map</strong>
+                        <p>Low best-match similarity scores are likely artifacts.</p>
+                    </div>
+                </div>
+
+                <div class="metric-note">
+                    <strong>Reading the map</strong>
+                    <div class="metric-note-grid">
+                        <div>
+                            <span class="metric-swatch metric-cool"></span>
+                            <span><b>Cool colors:</b> the novel-view patch has a close match in the training views.</span>
+                        </div>
+                        <div>
+                            <span class="metric-swatch metric-warm"></span>
+                            <span><b>Warm colors:</b> the patch is unlike the scene-specific reference distribution, so it is marked as likely artifact.</span>
+                        </div>
+                    </div>
+                    <p>
+                        In implementation, PuzzleSim normalizes CNN feature vectors and computes the best cosine-similarity match between each novel-view patch embedding and the reference feature distribution given by the training views. This produces one similarity map per selected CNN layer. These maps are upsampled to image resolution and averaged, so the final output combines fine local texture cues with slightly coarser perceptual context.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!--
+            Interactive comparison sliders for artifact visualization and metric comparison.
+            Images are extracted from Puzzle_Similarity_paper.pdf.
+        -->
+
+        <div class="row" style="margin-bottom:42px;">
+            <div class="col-md-8 col-md-offset-2">
+                <h3>Qualitative Comparison</h3>
+                <p class="text-justify" style="margin-bottom:25px;">
+                    Figure 4 compares artifact-ridden novel views against several map-producing metrics and average human labels. PuzzleSim produces fine-grained maps that better separate localized artifacts from well-reconstructed regions. <br>
+                    <br>
+                    <span style="font-size:1.07em;color:#b10068">
+                      <b>Move the slider</b> to compare the rendering with the selected map. Click a metric below each slider to swap the right side.
+                    </span>
+                </p>
+
+                <div class="comparison-block" data-comparison style="margin-bottom:35px;">
+                    <div class="comparison-title">Example 1: Bicycle scene <span style="color:#bbb;">vs</span> <span data-selected-label>PuzzleSim Artifact Map</span></div>
+                    <div class="img-comp-container" style="margin-bottom:7px; padding-bottom:66.45%;">
+                        <div class="img-comp-img">
+                            <img data-metric-image src="img/comparisons/fig4_bicycle_puzzlesim_aligned.png" width="100%" alt="PuzzleSim artifact map" />
+                        </div>
+                        <div class="img-comp-img img-comp-overlay">
+                            <img src="img/comparisons/fig4_bicycle_rendering.png" width="100%" alt="Artifact-ridden bicycle novel view" />
+                        </div>
+                    </div>
+                    <div class="comp-labels" style="display:flex;justify-content:space-between;font-size:0.98em;">
+                        <div>Artifact-ridden Novel View</div>
+                        <div data-right-label>PuzzleSim Artifact Map</div>
+                    </div>
+                    <div class="map-grid">
+                        <button class="map-card is-active" type="button" data-map-src="img/comparisons/fig4_bicycle_puzzlesim_aligned.png" data-map-label="PuzzleSim Artifact Map">
+                            <img src="img/comparisons/fig4_bicycle_puzzlesim_aligned.png" alt="PuzzleSim artifact map for bicycle scene">
+                            <span>PuzzleSim</span>
+                        </button>
+                        <button class="map-card" type="button" data-map-src="img/comparisons/fig4_bicycle_crossscore_aligned.png" data-map-label="CrossScore Map">
+                            <img src="img/comparisons/fig4_bicycle_crossscore_aligned.png" alt="CrossScore map for bicycle scene">
+                            <span>CrossScore</span>
+                        </button>
+                        <button class="map-card" type="button" data-map-src="img/comparisons/fig4_bicycle_paq2piq_aligned.png" data-map-label="PaQ-2-PiQ Map">
+                            <img src="img/comparisons/fig4_bicycle_paq2piq_aligned.png" alt="PaQ-2-PiQ map for bicycle scene">
+                            <span>PaQ-2-PiQ</span>
+                        </button>
+                        <button class="map-card" type="button" data-map-src="img/comparisons/fig4_bicycle_human_aligned.png" data-map-label="Human Labels">
+                            <img src="img/comparisons/fig4_bicycle_human_aligned.png" alt="Human labels for bicycle scene">
+                            <span>Human labels</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="comparison-block" data-comparison style="margin-bottom:35px;">
+                    <div class="comparison-title">Example 2: Tree scene <span style="color:#bbb;">vs</span> <span data-selected-label>PuzzleSim Artifact Map</span></div>
+                    <div class="img-comp-container" style="margin-bottom:7px; padding-bottom:65.67%;">
+                        <div class="img-comp-img">
+                            <img data-metric-image src="img/comparisons/fig4_tree_puzzlesim_aligned.png" width="100%" alt="PuzzleSim artifact map" />
+                        </div>
+                        <div class="img-comp-img img-comp-overlay">
+                            <img src="img/comparisons/fig4_tree_rendering.png" width="100%" alt="Artifact-ridden tree novel view" />
+                        </div>
+                    </div>
+                    <div class="comp-labels" style="display:flex;justify-content:space-between;font-size:0.98em;">
+                        <div>Artifact-ridden Novel View</div>
+                        <div data-right-label>PuzzleSim Artifact Map</div>
+                    </div>
+                    <div class="map-grid">
+                        <button class="map-card is-active" type="button" data-map-src="img/comparisons/fig4_tree_puzzlesim_aligned.png" data-map-label="PuzzleSim Artifact Map">
+                            <img src="img/comparisons/fig4_tree_puzzlesim_aligned.png" alt="PuzzleSim artifact map for tree scene">
+                            <span>PuzzleSim</span>
+                        </button>
+                        <button class="map-card" type="button" data-map-src="img/comparisons/fig4_tree_crossscore_aligned.png" data-map-label="CrossScore Map">
+                            <img src="img/comparisons/fig4_tree_crossscore_aligned.png" alt="CrossScore map for tree scene">
+                            <span>CrossScore</span>
+                        </button>
+                        <button class="map-card" type="button" data-map-src="img/comparisons/fig4_tree_paq2piq_aligned.png" data-map-label="PaQ-2-PiQ Map">
+                            <img src="img/comparisons/fig4_tree_paq2piq_aligned.png" alt="PaQ-2-PiQ map for tree scene">
+                            <span>PaQ-2-PiQ</span>
+                        </button>
+                        <button class="map-card" type="button" data-map-src="img/comparisons/fig4_tree_human_aligned.png" data-map-label="Human Labels">
+                            <img src="img/comparisons/fig4_tree_human_aligned.png" alt="Human labels for tree scene">
+                            <span>Human labels</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="comparison-block" data-comparison style="margin-bottom:10px;">
+                    <div class="comparison-title">Example 3: Indoor scene <span style="color:#bbb;">vs</span> <span data-selected-label>PuzzleSim Artifact Map</span></div>
+                    <div class="img-comp-container" style="margin-bottom:7px; padding-bottom:65.77%;">
+                        <div class="img-comp-img">
+                            <img data-metric-image src="img/comparisons/fig4_room_puzzlesim_aligned.png" width="100%" alt="PuzzleSim artifact map" />
+                        </div>
+                        <div class="img-comp-img img-comp-overlay">
+                            <img src="img/comparisons/fig4_room_rendering.png" width="100%" alt="Artifact-ridden indoor novel view" />
+                        </div>
+                    </div>
+                    <div class="comp-labels" style="display:flex;justify-content:space-between;font-size:0.98em;">
+                        <div>Artifact-ridden Novel View</div>
+                        <div data-right-label>PuzzleSim Artifact Map</div>
+                    </div>
+                    <div class="map-grid">
+                        <button class="map-card is-active" type="button" data-map-src="img/comparisons/fig4_room_puzzlesim_aligned.png" data-map-label="PuzzleSim Artifact Map">
+                            <img src="img/comparisons/fig4_room_puzzlesim_aligned.png" alt="PuzzleSim artifact map for indoor scene">
+                            <span>PuzzleSim</span>
+                        </button>
+                        <button class="map-card" type="button" data-map-src="img/comparisons/fig4_room_crossscore_aligned.png" data-map-label="CrossScore Map">
+                            <img src="img/comparisons/fig4_room_crossscore_aligned.png" alt="CrossScore map for indoor scene">
+                            <span>CrossScore</span>
+                        </button>
+                        <button class="map-card" type="button" data-map-src="img/comparisons/fig4_room_paq2piq_aligned.png" data-map-label="PaQ-2-PiQ Map">
+                            <img src="img/comparisons/fig4_room_paq2piq_aligned.png" alt="PaQ-2-PiQ map for indoor scene">
+                            <span>PaQ-2-PiQ</span>
+                        </button>
+                        <button class="map-card" type="button" data-map-src="img/comparisons/fig4_room_human_aligned.png" data-map-label="Human Labels">
+                            <img src="img/comparisons/fig4_room_human_aligned.png" alt="Human labels for indoor scene">
+                            <span>Human labels</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Comparison Slider CSS -->
+        <style>
+        .puzzlesim-explainer,
+        .qualitative-comparison {
+            margin-bottom: 34px;
+        }
+
+        .metric-flow {
+            align-items: stretch;
+            display: flex;
+            gap: 12px;
+            margin: 22px 0 18px;
+        }
+
+        .metric-step {
+            background: #fbfbfc;
+            border: 1px solid #e6e3e8;
+            border-radius: 8px;
+            flex: 1;
+            min-width: 0;
+            padding: 14px 12px 12px;
+            position: relative;
+            text-align: center;
+        }
+
+        .metric-step p {
+            color: #4a4050;
+            font-size: 13px;
+            line-height: 1.35;
+            margin: 7px 0 0;
+        }
+
+        .step-label {
+            background: #b10068;
+            border-radius: 50%;
+            color: #fff;
+            font-weight: 700;
+            height: 24px;
+            left: 10px;
+            line-height: 24px;
+            position: absolute;
+            top: 10px;
+            width: 24px;
+        }
+
+        .metric-connector {
+            align-items: center;
+            color: #b10068;
+            display: flex;
+            font-size: 23px;
+            font-weight: 700;
+        }
+
+        .step-art {
+            height: 72px;
+            margin: 5px auto 12px;
+            position: relative;
+            width: 98px;
+        }
+
+        .reference-stack span {
+            background: linear-gradient(135deg, #cfe9f0, #315f52 45%, #efefe7);
+            border: 2px solid #fff;
+            box-shadow: 0 5px 14px rgba(0,0,0,.14);
+            height: 48px;
+            left: 23px;
+            position: absolute;
+            top: 13px;
+            width: 58px;
+        }
+
+        .reference-stack span:nth-child(1) { transform: translate(-16px, 5px) rotate(-8deg); }
+        .reference-stack span:nth-child(2) { transform: translate(0, 0) rotate(4deg); }
+        .reference-stack span:nth-child(3) { transform: translate(15px, 7px) rotate(9deg); }
+
+        .patch-bank {
+            align-content: center;
+            display: grid;
+            gap: 5px;
+            grid-template-columns: repeat(4, 1fr);
+            padding: 11px 15px;
+        }
+
+        .patch-bank span {
+            background: #d7edf3;
+            border-radius: 4px;
+            height: 13px;
+        }
+
+        .patch-bank span:nth-child(3n) { background: #79c8cc; }
+        .patch-bank span:nth-child(4n) { background: #2d6f66; }
+        .patch-bank span:nth-child(5n) { background: #f0a340; }
+
+        .match-strip {
+            align-items: center;
+            display: flex;
+            justify-content: center;
+        }
+
+        .query-patch,
+        .best-patch {
+            border-radius: 7px;
+            display: block;
+            height: 38px;
+            width: 38px;
+        }
+
+        .query-patch {
+            background: linear-gradient(135deg, #202f66, #28b9c7);
+        }
+
+        .best-patch {
+            background: linear-gradient(135deg, #22336b, #2fc1c2);
+            box-shadow: 0 0 0 3px rgba(177,0,104,.18);
+        }
+
+        .match-line {
+            background: #b10068;
+            display: block;
+            height: 3px;
+            margin: 0 8px;
+            width: 28px;
+        }
+
+        .heatmap-icon {
+            display: grid;
+            gap: 3px;
+            grid-template-columns: repeat(2, 1fr);
+            padding: 9px 22px;
+        }
+
+        .heatmap-icon span {
+            border-radius: 50%;
+            display: block;
+        }
+
+        .heatmap-icon span:nth-child(1) { background: #0613a8; }
+        .heatmap-icon span:nth-child(2) { background: #15c9dc; }
+        .heatmap-icon span:nth-child(3) { background: #ffe24d; }
+        .heatmap-icon span:nth-child(4) { background: #e11b00; }
+
+        .metric-note {
+            background: #f7f7f8;
+            border-left: 4px solid #b10068;
+            border-radius: 6px;
+            display: grid;
+            gap: 10px;
+            padding: 14px 16px;
+        }
+
+        .metric-note p {
+            margin: 0;
+        }
+
+        .metric-note-grid {
+            display: grid;
+            gap: 10px;
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .metric-note-grid > div {
+            align-items: flex-start;
+            background: #fff;
+            border: 1px solid #ece7ee;
+            border-radius: 6px;
+            display: grid;
+            gap: 5px;
+            grid-template-columns: 18px 1fr;
+            padding: 10px;
+        }
+
+        .metric-swatch {
+            border-radius: 50%;
+            display: inline-block;
+            height: 14px;
+            margin-top: 3px;
+            width: 14px;
+        }
+
+        .metric-cool {
+            background: #164bd6;
+        }
+
+        .metric-warm {
+            background: #e52800;
+        }
+
+        .comparison-title {
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .img-comp-container {
+            position: relative;
+            height: 0;
+            padding-bottom: 66.45%;
+            margin-bottom:8px;
+        }
+        .img-comp-img {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            top: 0; left: 0;
+        }
+        .img-comp-img img {
+            display: block;
+            height: 100%;
+            object-fit: cover;
+            width: 100%;
+            pointer-events: none;
+            user-select: none;
+        }
+        .img-comp-overlay {
+            width: 50%;
+            border-right: 2.5px solid #b10068;
+            box-shadow: 3px 0 10px -6px #b10068a4;
+        }
+        .img-comp-overlay img {
+            max-width: none;
+            width: var(--comparison-width, 100%);
+        }
+        .img-comp-slider {
+            position: absolute;
+            z-index: 15;
+            cursor: ew-resize;
+            width: 28px;
+            height: 28px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            box-shadow: 0 0 8px 2px #0001;
+            background: #b10068;
+            border: 2.5px solid #fff;
+            transition: box-shadow .1s;
+            opacity: 0.93;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .img-comp-slider:after {
+            content:'⇆';
+            color:#fff;
+            font-size:1.00em;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+            line-height:1;
+        }
+
+        /* Triple slider style */
+        .triple-comp-container {
+            width: 100%;
+            min-height: 120px;
+        }
+        .triple-comp-slider {
+            position: absolute;
+            z-index: 16;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 23px;
+            height: 23px;
+            background: #b10068;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 8px 1px #0002;
+            cursor: ew-resize;
+            opacity: 0.92;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .triple-comp-slider:after {
+            content:'⇆';
+            color:#fff;
+            font-size:0.92em;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+            line-height:1;
+        }
+        .triple-img {
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .map-grid {
+            display: grid;
+            gap: 14px;
+            grid-template-columns: repeat(4, 1fr);
+            margin-top: 24px;
+        }
+
+        .map-card {
+            background: #fbfbfc;
+            border: 1px solid #e6e3e8;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 0;
+            overflow: hidden;
+            padding: 0;
+            text-align: center;
+            transition: border-color .12s ease, box-shadow .12s ease, transform .12s ease;
+        }
+
+        .map-card:hover,
+        .map-card:focus {
+            border-color: #b10068;
+            box-shadow: 0 4px 14px rgba(177,0,104,.16);
+            outline: none;
+            transform: translateY(-1px);
+        }
+
+        .map-card.is-active {
+            border-color: #b10068;
+            box-shadow: 0 0 0 2px rgba(177,0,104,.2);
+        }
+
+        .map-grid img {
+            aspect-ratio: 1237 / 822;
+            display: block;
+            object-fit: cover;
+            width: 100%;
+        }
+
+        .map-card span {
+            display: block;
+            color: #34273d;
+            font-weight: 700;
+            padding: 8px 10px 9px;
+            text-align: center;
+        }
+
+        /* Responsive for cols */
+        @media (max-width: 991px) {
+            .metric-flow {
+                display: grid;
+                grid-template-columns: 1fr;
+            }
+
+            .metric-connector {
+                display: none;
+            }
+
+            .map-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .metric-note-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width:767px) {
+            html,
+            body {
+                overflow-x: hidden;
+            }
+
+            #main {
+                max-width: 100%;
+                min-width: 0;
+                padding-left: 14px;
+                padding-right: 14px;
+                width: auto !important;
+            }
+
+            body .container {
+                min-width: 0 !important;
+                width: auto !important;
+            }
+
+            #main > .row {
+                margin-left: 0;
+                margin-right: 0;
+            }
+
+            #main [class*="col-"] {
+                margin-left: 0 !important;
+                padding-left: 0;
+                padding-right: 0;
+                width: 100% !important;
+            }
+
+            #main h2 {
+                font-size: 24px;
+                line-height: 1.22;
+                overflow-wrap: anywhere;
+            }
+
+            #main h2 small {
+                display: block;
+                margin-top: 8px;
+            }
+
+            #main .row[style*="margin-bottom: 30px"] > div > div {
+                padding: 22px 20px 20px !important;
+            }
+
+            #main .text-justify {
+                text-align: left;
+            }
+
+            .col-sm-6 { width:100%; display:block; margin-bottom:16px; }
+        }
+
+        @media (max-width: 520px) {
+            .map-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        </style>
+
+
+        <!-- Comparison Slider JS -->
+        <script>
+        // Classical 2-way comparison slider
+        function initComparisons() {
+            var containers = document.getElementsByClassName("img-comp-container");
+            for(let c=0; c<containers.length; ++c) {
+                let container = containers[c];
+                let overlays = container.getElementsByClassName("img-comp-overlay");
+                if(overlays.length===0) continue;
+                let overlay = overlays[0];
+                let overlayImg = overlay.getElementsByTagName("img")[0];
+                let comparisonBlock = container.closest("[data-comparison]");
+                let metricImg = comparisonBlock ? comparisonBlock.querySelector("[data-metric-image]") : null;
+                let selectedLabels = comparisonBlock ? comparisonBlock.querySelectorAll("[data-selected-label], [data-right-label]") : [];
+
+                // Create slider
+                let slider = document.createElement("div");
+                slider.className = "img-comp-slider";
+                container.appendChild(slider);
+
+                // Set initial overlay size and slider
+                let w = container.offsetWidth;
+                if (overlayImg) overlayImg.style.setProperty("--comparison-width", w + "px");
+                overlay.style.width = (w/2) + "px";
+                slider.style.left = "50%";
+                slider.style.top = "50%";
+
+                // Events
+                let clicked = false;
+
+                slider.addEventListener("mousedown", dragStart);
+                window.addEventListener("mouseup", dragEnd);
+                window.addEventListener("mousemove", dragMove);
+
+                slider.addEventListener("touchstart", dragStart, {passive:false});
+                window.addEventListener("touchend", dragEnd, {passive:false});
+                window.addEventListener("touchmove", dragMove, {passive:false});
+
+                function getCursorX(e) {
+                    var rect = container.getBoundingClientRect();
+                    let x = 0;
+                    if(e.touches) x = e.touches[0].clientX;
+                    else x = e.clientX;
+                    return x - rect.left;
+                }
+                function dragStart(e) {
+                    e.preventDefault();
+                    clicked = true;
+                }
+                function dragEnd(e) {
+                    clicked = false;
+                }
+                function dragMove(e) {
+                    if(!clicked) return;
+                    let x = getCursorX(e);
+                    slide(x);
+                }
+                function slide(x) {
+                    let w = container.offsetWidth;
+                    if (overlayImg) overlayImg.style.setProperty("--comparison-width", w + "px");
+                    if(x<0) x=0;
+                    if(x>w) x=w;
+                    overlay.style.width = x + "px";
+                    slider.style.left = (x / w * 100) + "%";
+                }
+
+                // On resize, adjust overlay
+                window.addEventListener("resize", ()=>{
+                    let w = container.offsetWidth;
+                    if (overlayImg) overlayImg.style.setProperty("--comparison-width", w + "px");
+                    overlay.style.width = (w/2) + "px";
+                    slider.style.left = "50%";
+                });
+
+                if (comparisonBlock && metricImg) {
+                    let cards = comparisonBlock.querySelectorAll(".map-card");
+                    for (let i = 0; i < cards.length; i++) {
+                        cards[i].addEventListener("click", function () {
+                            let nextSrc = this.getAttribute("data-map-src");
+                            let nextLabel = this.getAttribute("data-map-label");
+                            if (!nextSrc || !nextLabel) return;
+
+                            metricImg.setAttribute("src", nextSrc);
+                            metricImg.setAttribute("alt", nextLabel);
+                            for (let j = 0; j < selectedLabels.length; j++) {
+                                selectedLabels[j].textContent = nextLabel;
+                            }
+                            for (let j = 0; j < cards.length; j++) {
+                                cards[j].classList.remove("is-active");
+                            }
+                            this.classList.add("is-active");
+                        });
+                    }
+                }
+
+            }
+        }
+
+        // Triple slider for triple-comp-container (Ours / Artifact / CrossScore)
+        function initTripleComparisons() {
+            var containers = document.getElementsByClassName("triple-comp-container");
+            for (let c = 0; c < containers.length; ++c) {
+                let container = containers[c];
+                let imgs = container.getElementsByTagName("img");
+                if (imgs.length !== 3) continue;
+                let [imgBase, imgMid, imgTop] = imgs;
+
+                // Find the two slider handles
+                let sliders = container.getElementsByClassName("triple-comp-slider");
+                if(sliders.length < 2) continue;
+                let s1 = sliders[0], s2 = sliders[1];
+                let dragState = {active:null, offsetLeft:0, w:0};
+
+                // Percent positions (as 0..1): p1 is divider Ours/Artifact, p2 is divider Artifact/Crossscore
+                let p1 = parseFloat(s1.style.left) / 100 || 0.33;
+                let p2 = parseFloat(s2.style.left) / 100 || 0.66;
+                if (!(p1 < p2)) { p1 = 0.33; p2 = 0.66;}
+
+                function updateClips() {
+                    // Both use left and right offsets in %
+                    let w = container.offsetWidth;
+                    // Safety
+                    if (p1 < 0.08) p1 = 0.08;
+                    if (p2 > 0.92) p2 = 0.92;
+                    if (p2 - p1 < 0.08) {
+                        if (dragState.active===1) p2 = p1+0.08;
+                        else if (dragState.active===2) p1 = p2-0.08;
+                    }
+                    // Ours: base -- always showing, under all
+                    // Artifact: show region [p1,p2]; top: CrossScore [p2,1]
+                    imgMid.style.clipPath = `inset(0 ${(100-(p2*100)).toFixed(2)}% 0 ${(p1*100).toFixed(2)}%)`;
+                    imgTop.style.clipPath = `inset(0 0 0 ${(p2*100).toFixed(2)}%)`;
+
+                    // Sliders
+                    s1.style.left = (p1*100)+"%";
+                    s2.style.left = (p2*100)+"%";
+                }
+
+                function getX(e) {
+                    var rect = container.getBoundingClientRect();
+                    let x = 0;
+                    if (e.touches && e.touches.length) x = e.touches[0].clientX;
+                    else x = e.clientX;
+                    return x - rect.left;
+                }
+                function dragStart(sliderNum, e) {
+                    e.preventDefault();
+                    dragState.active = sliderNum;
+                    dragState.offsetLeft = container.getBoundingClientRect().left;
+                    dragState.w = container.offsetWidth;
+                }
+                function dragEnd(e) {
+                    dragState.active = null;
+                }
+                function dragMove(e) {
+                    if (!dragState.active) return;
+                    let w = container.offsetWidth;
+                    let x = getX(e);
+                    let pos = x / w;
+                    // Clamp 0..1
+                    if (pos < 0) pos = 0;
+                    if (pos > 1) pos = 1;
+                    if (dragState.active === 1) {
+                        if (pos > p2 - 0.08) pos = p2 - 0.08;
+                        if (pos < 0.08) pos = 0.08;
+                        p1 = pos;
+                    } else if (dragState.active === 2) {
+                        if (pos < p1 + 0.08) pos = p1 + 0.08;
+                        if (pos > 0.92) pos = 0.92;
+                        p2 = pos;
+                    }
+                    updateClips();
+                }
+                // Event listeners for both sliders
+                [s1, s2].forEach((sliderNode, idx) => {
+                    let n = idx+1;
+                    sliderNode.addEventListener("mousedown", e=>dragStart(n,e));
+                    window.addEventListener("mouseup", dragEnd);
+                    window.addEventListener("mousemove", dragMove);
+
+                    sliderNode.addEventListener("touchstart", e=>dragStart(n,e), {passive:false});
+                    window.addEventListener("touchend", dragEnd, {passive:false});
+                    window.addEventListener("touchmove", dragMove, {passive:false});
+                });
+
+                // Responsive: adjust on window resize
+                window.addEventListener("resize", updateClips);
+                // Initial render
+                setTimeout(updateClips,80);
+            }
+        }
+
+        window.addEventListener("DOMContentLoaded", ()=>{
+            initComparisons();
+            initTripleComparisons();
+        });
+        </script>
+
 <!--        <div class="row">-->
 <!--            <div class="col-md-8 col-md-offset-2">-->
 <!--                <h3>-->
@@ -263,8 +1068,8 @@
                     <h3>
                         Application
                     </h3>
-                    <image src="img/applications.svg" width="100%">
-                    <image src="img/applications-2.svg" width="100%">
+                    <img src="img/applications.svg" width="100%" alt="PuzzleSim applications overview">
+                    <img src="img/applications-2.svg" width="100%" alt="PuzzleSim inpainting application">
                     <p class="text-justify">
                         <br>
                         Our metric can also be applied in automatic restoration of novel images from a reconstructed scene. Whenever it is possible to establish a visual distribution (e.g. we have a training dataset available), we can recursively use our metric to automatically identify visual outliers in novel views and remove them through neural inpainting.
