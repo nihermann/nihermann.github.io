@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0d0e0e">
+    <title>Interactive 3D portrait</title>
+    <script type="module" crossorigin src="./assets/index-5d43d0be.js"></script>
+    <link rel="stylesheet" href="./assets/index-304fade7.css">
+    <style>
+      .masthead,
+      .details,
+      .controls,
+      .grain {
+        display: none;
+      }
+
+      .viewer {
+        background:
+          radial-gradient(circle at 50% 42%, rgba(74, 62, 53, 0.22), transparent 48%),
+          #0d0e0e;
+      }
+
+      .status {
+        width: max-content;
+        max-width: calc(100% - 32px);
+        font-size: 0.55rem;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="viewer" aria-label="Interactive 3D portrait">
+      <canvas id="scene" aria-label="Drag to rotate the 3D portrait"></canvas>
+
+      <div class="status" id="status" role="status" aria-live="polite">
+        <span class="status__dot"></span>
+        <span id="status-text">Loading portrait</span>
+      </div>
+    </main>
+
+    <script>
+      const embeddedCanvas = document.getElementById('scene');
+      const embeddedStatusText = document.getElementById('status-text');
+      let reportedState = false;
+
+      const reportViewerState = () => {
+        if (reportedState) return;
+
+        if (embeddedCanvas.classList.contains('is-ready')) {
+          reportedState = true;
+          window.parent.postMessage({type: 'nicolai-portrait-ready'}, '*');
+        } else if (embeddedStatusText.textContent.includes('Unable')) {
+          reportedState = true;
+          window.parent.postMessage({type: 'nicolai-portrait-error'}, '*');
+        }
+      };
+
+      new MutationObserver(reportViewerState).observe(document.body, {
+        attributes: true,
+        childList: true,
+        characterData: true,
+        subtree: true
+      });
+    </script>
+  </body>
+</html>

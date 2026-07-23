@@ -19,7 +19,95 @@
     <style>
       .p-bibtex {font-size: 12px; margin-bottom: 0px; max-width: 650px; text-align: left;}
       .page-wrap {max-width: 800px; margin: 0 auto; padding: 0 15px;}
-      .profile-photo {width: 100%; max-width: 280px; object-fit: contain; border-radius: 50%;}
+      .profile-portrait {
+        position: relative;
+        width: 100%;
+        max-width: 280px;
+        aspect-ratio: 1;
+        margin: 0 auto;
+        overflow: hidden;
+        border-radius: 50%;
+        background: #0d0e0e;
+        box-shadow: 0 8px 28px rgba(13, 14, 14, 0.14);
+        isolation: isolate;
+      }
+      .profile-photo,
+      .profile-viewer {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        transition: opacity .55s ease;
+      }
+      .profile-photo {
+        z-index: 1;
+        object-fit: cover;
+      }
+      .profile-viewer {
+        z-index: 2;
+        border: 0;
+        background: #0d0e0e;
+        opacity: 0;
+        pointer-events: none;
+      }
+      .profile-portrait.is-3d-ready[data-view="3d"] .profile-photo {
+        opacity: 0;
+      }
+      .profile-portrait.is-3d-ready[data-view="3d"] .profile-viewer {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .profile-mode-controls {
+        position: absolute;
+        z-index: 3;
+        left: 50%;
+        bottom: 14px;
+        display: flex;
+        gap: 3px;
+        padding: 3px;
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        border-radius: 999px;
+        background: rgba(13, 14, 14, 0.72);
+        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(8px);
+        transform: translateX(-50%);
+      }
+      .profile-mode-button,
+      .profile-download {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 30px;
+        height: 30px;
+        padding: 0;
+        border: 0;
+        border-radius: 50%;
+        background: transparent;
+        color: rgba(255, 255, 255, 0.72);
+        cursor: pointer;
+        transition: background-color .2s ease, color .2s ease;
+      }
+      .profile-mode-button:hover,
+      .profile-mode-button:focus-visible,
+      .profile-download:hover,
+      .profile-download:focus-visible {
+        background: rgba(255, 255, 255, 0.16);
+        color: #fff;
+      }
+      .profile-mode-button.is-active {
+        background: #fff;
+        color: #0d0e0e;
+      }
+      .profile-mode-button:focus-visible,
+      .profile-download:focus-visible {
+        outline: 2px solid #fff;
+        outline-offset: 2px;
+      }
+      .profile-mode-button:disabled {
+        cursor: wait;
+        opacity: .68;
+      }
       .project-item {padding: 40px 0;}
       .project-thumb {width: 175px; height: 175px; object-fit: cover;}
       .project-content {padding-top: 8px;}
@@ -40,6 +128,7 @@
 
       @media (max-width: 767.98px) {
         .profile-name {font-size: 40px; padding-top: 10px;}
+        .profile-portrait {max-width: 260px;}
         .project-item {padding: 28px 0;}
         .project-media {margin-bottom: 16px;}
         .project-thumb,
@@ -63,6 +152,13 @@
           }
         }
 
+      @media (prefers-reduced-motion: reduce) {
+        .profile-photo,
+        .profile-viewer {
+          transition: none;
+        }
+      }
+
       @media (max-width: 390px) {
         .qr-actions {
           justify-content: space-between;
@@ -77,7 +173,52 @@
       <div class="page-wrap">
         <section class="row align-items-center py-3">
           <div class="col-md-4 text-center order-1 order-md-2 mb-3 mb-md-0">
-            <img alt="profile photo" src="images/nicolai_hermann_profile.jpg" class="profile-photo hoverZoomLink">
+            <div class="profile-portrait" id="profile-portrait" data-view="photo">
+              <img
+                alt="Nicolai Hermann"
+                src="images/nicolai_hermann_profile_560.webp"
+                class="profile-photo"
+                width="560"
+                height="560"
+                fetchpriority="high"
+              >
+              <iframe
+                class="profile-viewer"
+                id="profile-viewer"
+                title="Interactive 3D portrait of Nicolai Hermann"
+                data-src="profile-3d/index.html"
+                tabindex="-1"
+              ></iframe>
+              <div class="profile-mode-controls" role="group" aria-label="Profile portrait controls">
+                <button
+                  class="profile-mode-button profile-photo-button is-active"
+                  type="button"
+                  aria-label="Show profile photo"
+                  aria-pressed="true"
+                  title="Show photo"
+                >
+                  <i class="fa-solid fa-image" aria-hidden="true"></i>
+                </button>
+                <button
+                  class="profile-mode-button profile-3d-button"
+                  type="button"
+                  aria-label="Show interactive 3D portrait"
+                  aria-pressed="false"
+                  title="Show interactive 3D portrait"
+                >
+                  <i class="fa-solid fa-cube" aria-hidden="true"></i>
+                </button>
+                <a
+                  class="profile-download"
+                  href="images/nicolai_hermann_profile.jpg"
+                  download="Nicolai_Hermann_profile.jpg"
+                  aria-label="Download high-resolution profile photo"
+                  title="Download high-resolution photo"
+                >
+                  <i class="fa-solid fa-download" aria-hidden="true"></i>
+                </a>
+              </div>
+            </div>
           </div>
           <div class="col-md-8 order-2 order-md-1">
             <p class="name profile-name text-center">Nicolai Hermann</p>
@@ -411,6 +552,79 @@
       puzzle_stop();
       mc_stop();
       generateQRCode();
+
+      (() => {
+        const portrait = document.getElementById('profile-portrait');
+        const viewer = document.getElementById('profile-viewer');
+        const photoButton = portrait.querySelector('.profile-photo-button');
+        const threeDButton = portrait.querySelector('.profile-3d-button');
+        const threeDIcon = threeDButton.querySelector('i');
+        let viewerStarted = false;
+        let viewerReady = false;
+        let requestedView = '3d';
+
+        function setPortraitView(view) {
+          requestedView = view;
+
+          if (view === '3d' && !viewerReady) {
+            startViewer();
+            return;
+          }
+
+          const showThreeD = view === '3d';
+          portrait.dataset.view = view;
+          photoButton.classList.toggle('is-active', !showThreeD);
+          threeDButton.classList.toggle('is-active', showThreeD);
+          photoButton.setAttribute('aria-pressed', String(!showThreeD));
+          threeDButton.setAttribute('aria-pressed', String(showThreeD));
+          viewer.tabIndex = showThreeD ? 0 : -1;
+        }
+
+        function startViewer() {
+          if (viewerStarted) return;
+          viewerStarted = true;
+          threeDButton.disabled = true;
+          threeDButton.title = 'Loading interactive 3D portrait';
+          threeDIcon.className = 'fa-solid fa-spinner fa-spin';
+          viewer.src = viewer.dataset.src;
+        }
+
+        photoButton.addEventListener('click', () => setPortraitView('photo'));
+        threeDButton.addEventListener('click', () => setPortraitView('3d'));
+
+        window.addEventListener('message', (event) => {
+          if (event.source !== viewer.contentWindow || !event.data) return;
+
+          if (event.data.type === 'nicolai-portrait-ready') {
+            viewerReady = true;
+            portrait.classList.add('is-3d-ready');
+            threeDButton.disabled = false;
+            threeDButton.title = 'Show interactive 3D portrait';
+            threeDIcon.className = 'fa-solid fa-cube';
+            setPortraitView(requestedView);
+          } else if (event.data.type === 'nicolai-portrait-error') {
+            threeDButton.disabled = true;
+            threeDButton.title = 'Interactive portrait unavailable';
+            threeDIcon.className = 'fa-solid fa-triangle-exclamation';
+          }
+        });
+
+        function deferViewer() {
+          if (navigator.connection && navigator.connection.saveData) return;
+
+          if ('requestIdleCallback' in window) {
+            window.requestIdleCallback(startViewer, {timeout: 1800});
+          } else {
+            window.setTimeout(startViewer, 650);
+          }
+        }
+
+        if (document.readyState === 'complete') {
+          deferViewer();
+        } else {
+          window.addEventListener('load', deferViewer, {once: true});
+        }
+      })();
     </script>
   </body>
 </html>
