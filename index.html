@@ -108,6 +108,9 @@
         cursor: wait;
         opacity: .68;
       }
+      .profile-mode-button.is-unavailable {
+        cursor: not-allowed;
+      }
       .project-item {padding: 40px 0;}
       .project-thumb {width: 175px; height: 175px; object-fit: cover;}
       .project-content {padding-top: 8px;}
@@ -559,6 +562,7 @@
         const photoButton = portrait.querySelector('.profile-photo-button');
         const threeDButton = portrait.querySelector('.profile-3d-button');
         const threeDIcon = threeDButton.querySelector('i');
+        const isDirectFilePreview = window.location.protocol === 'file:';
         let viewerStarted = false;
         let viewerReady = false;
         let requestedView = '3d';
@@ -591,6 +595,14 @@
 
         photoButton.addEventListener('click', () => setPortraitView('photo'));
         threeDButton.addEventListener('click', () => setPortraitView('3d'));
+
+        if (isDirectFilePreview) {
+          threeDButton.disabled = true;
+          threeDButton.classList.add('is-unavailable');
+          threeDButton.title = '3D portrait requires a local web server';
+          threeDButton.setAttribute('aria-label', '3D portrait requires a local web server');
+          return;
+        }
 
         window.addEventListener('message', (event) => {
           if (event.source !== viewer.contentWindow || !event.data) return;
