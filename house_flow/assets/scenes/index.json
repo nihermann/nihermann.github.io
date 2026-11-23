@@ -1,0 +1,62 @@
+[
+ {
+  "key": "ase",
+  "gt_corners": 32,
+  "pred_corners": 32,
+  "f1_2cm": 0.844,
+  "f1_5cm": 1.0,
+  "size": [
+   9.88,
+   8.7,
+   4.69
+  ]
+ },
+ {
+  "key": "roofs",
+  "gt_corners": 202,
+  "pred_corners": 196,
+  "f1_2cm": 0.95,
+  "f1_5cm": 0.96,
+  "size": [
+   9.31,
+   8.54,
+   4.79
+  ]
+ },
+ {
+  "key": "stairs",
+  "gt_corners": 347,
+  "pred_corners": 349,
+  "f1_2cm": 0.963,
+  "f1_5cm": 0.974,
+  "size": [
+   6.12,
+   9.78,
+   4.5
+  ]
+ },
+ {
+  "key": "three",
+  "gt_corners": 535,
+  "pred_corners": 538,
+  "f1_2cm": 0.973,
+  "f1_5cm": 0.988,
+  "size": [
+   8.77,
+   6.58,
+   9.26
+  ]
+ },
+ {
+  "key": "four",
+  "gt_corners": 632,
+  "pred_corners": 640,
+  "f1_2cm": 0.932,
+  "f1_5cm": 0.961,
+  "size": [
+   7.59,
+   6.14,
+   10.93
+  ]
+ }
+]

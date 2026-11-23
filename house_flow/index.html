@@ -1,0 +1,1397 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://nihermann.github.io/house_flow/">
+<meta property="og:title" content="HouseFlow: Reconstructing Building Interior Layouts as 3D Graphs with Multimodal Flow Matching">
+<meta property="og:description" content="HouseFlow reconstructs building interiors from point-cloud scans as 3D layout graphs with multimodal flow matching: continuous corner positions, discrete connectivity and classes.">
+<meta property="og:image" content="https://nihermann.github.io/house_flow/assets/img/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="534">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M5 15 16 5l11 10v12H5z' fill='none' stroke='%235B3FD0' stroke-width='3' stroke-linejoin='round'/%3E%3C/svg%3E">
+<title>HouseFlow</title>
+<meta name="description" content="HouseFlow reconstructs building interiors as 3D graphs with multimodal flow matching.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=JetBrains+Mono:wght@400;500&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+/* Layout: one 1080px column on white (light only, at the user's request). Section rules are dimension lines. Stage colours follow the paper figure: gold = source density,
+   magenta = source samples, violet = flow / HouseFlow. Class colours follow the paper's renders. */
+:root {
+  --paper: #FFFFFF;
+  --sheet: #FFFFFF;
+  --plate: #FFFFFF;
+  --ink: #221E33;
+  --ink-2: #4A4560;
+  --muted: #6E6986;
+  --rule: #DCD9E7;
+  --grid: #E8E6F1;
+  --violet: #5B3FD0;
+  --violet-soft: #ECE8FB;
+  --gold: #C98A0B;
+  --magenta: #C2185B;
+  --wall: #2A2540;
+  --door: #3FA34D;
+  --window: #1E88E5;
+  --stair: #8D6E63;
+  --pt-a: #3D3760;
+  --pt-b: #B4AECB;
+  --ss: #C8691C;
+  --sl: #00927F;
+  --rf: #9A96AC;
+  --f-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --f-body: "Source Sans 3", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --radius: 6px;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--paper); color: var(--ink); font-family: var(--f-body); font-size: 17px; line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--violet); text-underline-offset: 3px; }
+:focus-visible { outline: 2px solid var(--violet); outline-offset: 2px; }
+.wrap {
+  max-width: 1080px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.prose { max-width: 68ch; }
+.mono { font-family: var(--f-mono); font-size: 0.78em; letter-spacing: 0.02em; }
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; }
+p { margin: 0; }
+
+/* ---------- header ---------- */
+.masthead {
+  background: var(--paper);
+  border-bottom: 1px solid var(--rule);
+}
+.masthead .wrap { padding-block: 40px 28px; display: grid; gap: 14px; position: relative; }
+.title {
+  font-size: clamp(52px, 10vw, 104px); line-height: 0.92; font-weight: 800; font-stretch: 125%;
+  font-variation-settings: "wdth" 125; letter-spacing: -0.02em;
+}
+.title .flow { color: var(--violet); }
+.subtitle {
+  font-family: var(--f-display); font-weight: 500; font-size: clamp(19px, 2.4vw, 27px); line-height: 1.25;
+  font-variation-settings: "wdth" 100; max-width: 32ch; color: var(--ink);
+}
+.links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
+.btn {
+  display: inline-flex; align-items: center; gap: 8px; padding: 9px 14px; border: 1px solid var(--ink);
+  border-radius: var(--radius); background: var(--sheet); color: var(--ink); font-family: var(--f-mono);
+  font-size: 13px; letter-spacing: 0.02em; text-decoration: none; cursor: pointer;
+}
+.btn svg { width: 16px; height: 16px; flex: none; }
+.btn:hover { background: var(--ink); color: var(--paper); }
+.btn[aria-disabled="true"] { border-style: dashed; border-color: var(--muted); color: var(--muted); cursor: default; }
+.btn[aria-disabled="true"]:hover { background: var(--sheet); color: var(--muted); }
+.btn .soon { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.08em; }
+
+/* ---------- sections ---------- */
+section { padding-block: 56px 8px; }
+.sec-head { display: flex; align-items: center; gap: 14px; margin-bottom: 22px; }
+.sec-head h2 { font-size: clamp(26px, 3.4vw, 34px); font-weight: 700; font-variation-settings: "wdth" 112; white-space: nowrap; }
+.dim { flex: 1; height: 9px; position: relative; min-width: 24px; }
+.dim::before { content: ""; position: absolute; left: 0; right: 0; top: 4px; border-top: 1px solid var(--rule); }
+.dim::after { content: ""; position: absolute; right: 0; top: 0; height: 9px; border-right: 1px solid var(--rule); }
+h3 { font-size: 19px; font-weight: 650; font-variation-settings: "wdth" 106; }
+.lede { font-size: 19px; color: var(--ink-2); }
+.note { font-size: 14px; color: var(--muted); }
+.stack { display: grid; gap: 16px; }
+
+/* ---------- teaser ---------- */
+.teaser { padding-block: 32px 0; }
+.teaser figure { margin: 0; display: grid; gap: 12px; }
+.teaser img { display: block; width: 100%; height: auto; }
+.teaser figcaption { font-size: 15.5px; color: var(--ink-2); max-width: 88ch; }
+.teaser figcaption b { color: var(--ink); }
+.cdot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin: 0 4px 1px 2px; vertical-align: middle; }
+
+/* ---------- hero viewer ---------- */
+.viewer {
+  position: relative; width: 100%; aspect-ratio: 16 / 9; max-width: 100%; background: var(--sheet);
+  border: 1px solid var(--rule); border-radius: var(--radius); overflow: hidden; touch-action: none;
+  --split: 0.5;
+}
+.viewer canvas { display: block; width: 100%; height: 100%; cursor: grab; }
+.viewer canvas:active { cursor: grabbing; }
+.split {
+  position: absolute; top: 0; bottom: 0; left: calc(var(--split) * 100%); width: 28px; margin-left: -14px;
+  cursor: ew-resize; display: flex; justify-content: center; touch-action: none;
+}
+.split::before { content: ""; width: 1.5px; background: var(--ink); opacity: 0.55; }
+.split .grip {
+  position: absolute; top: 50%; transform: translateY(-50%); width: 28px; height: 28px; border-radius: 50%;
+  background: var(--sheet); border: 1.5px solid var(--ink); display: grid; place-items: center;
+}
+.split .grip svg { width: 14px; height: 14px; }
+.split:focus-visible .grip { outline: 2px solid var(--violet); outline-offset: 2px; }
+.split:focus-visible { outline: none; }
+.side-label {
+  position: absolute; top: 12px; font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--muted); pointer-events: none; background: var(--sheet); padding: 2px 6px; border-radius: 3px;
+}
+.side-label.l { left: 12px; } .side-label.r { right: 12px; }
+.viewer-status { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); font-size: 15px; pointer-events: none; text-align: center; padding: 16px; }
+.viewer-status[hidden] { display: none; }
+.viewer-bar { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; justify-content: space-between; margin-top: 12px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  font-family: var(--f-body); font-size: 14.5px; padding: 5px 12px; border-radius: 999px; border: 1px solid var(--rule);
+  background: var(--sheet); color: var(--ink-2); cursor: pointer;
+}
+.chip:hover { border-color: var(--ink-2); }
+.chip[aria-checked="true"], .chip[aria-selected="true"], .chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+.readout { font-family: var(--f-mono); font-size: 12.5px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 14px; color: var(--ink-2); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 16px; height: 3px; border-radius: 2px; display: inline-block; }
+.hero-caption { margin-top: 10px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px; }
+
+/* ---------- tl;dr ---------- */
+.tldr { display: grid; gap: 28px; }
+.tldr .sec-head { margin-bottom: -6px; }
+.tldr .prose { font-size: 19px; }
+.glance { margin: 0; display: grid; gap: 12px; }
+.glance-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.gpanel { background: var(--sheet); border: 1px solid var(--rule); border-radius: var(--radius); padding: 12px 12px 6px; display: grid; gap: 2px; min-width: 0; }
+.gpanel .gt { font-weight: 600; font-size: 15px; line-height: 1.3; }
+.gpanel .gs { font-family: var(--f-mono); font-size: 11px; color: var(--muted); }
+.gpanel svg { display: block; width: 100%; height: auto; margin-top: 6px; }
+.gpanel text { font-family: var(--f-mono); font-size: 10.5px; }
+
+/* ---------- method explainer ---------- */
+.explainer { background: var(--sheet); border: 1px solid var(--rule); border-radius: var(--radius); overflow: hidden; }
+.ex-steps { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0 6px; padding: 0 10px; border-bottom: 1px solid var(--rule); }
+.ex-step {
+  appearance: none; border: 0; background: transparent; color: var(--muted); text-align: left; padding: 13px 4px 14px;
+  font-family: var(--f-body); font-size: 15.5px; line-height: 1.25; cursor: pointer; min-width: 0; position: relative;
+}
+.ex-step b { display: block; font-family: var(--f-mono); font-size: 11.5px; font-weight: 500; letter-spacing: 0.08em; margin-bottom: 2px; }
+.ex-step .pbar { position: absolute; left: 4px; right: 4px; bottom: 6px; height: 4px; border-radius: 2px; background: var(--grid); overflow: hidden; }
+.ex-step .pbar i { display: block; height: 100%; width: 0; background: var(--stage-c, var(--violet)); border-radius: 2px; }
+.ex-step[aria-selected="true"] { color: var(--ink); font-weight: 600; }
+.ex-step:hover { color: var(--ink); }
+.ex-body { position: relative; }
+.ex-say {
+  position: absolute; z-index: 1; top: 18px; right: 18px; width: calc(34% - 30px); pointer-events: none;
+  border-left: 4px solid var(--stage-c, var(--violet)); padding: 2px 0 4px 14px; background: rgba(255, 255, 255, 0.9);
+  display: grid; gap: 4px;
+}
+.ex-say .k { font-family: var(--f-mono); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.ex-say .h { font-family: var(--f-display); font-weight: 700; font-size: 25px; line-height: 1.15; font-variation-settings: "wdth" 106; color: var(--ink); }
+.ex-say p { font-size: 17px; line-height: 1.45; color: var(--ink-2); }
+.ex-say.in { animation: say-in 0.45s ease-out; }
+@keyframes say-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.ex-stage { position: relative; aspect-ratio: 16 / 9; max-width: 100%; }
+.ex-stage canvas { display: block; width: 100%; height: 100%; cursor: ew-resize; touch-action: pan-y; }
+.ex-hud {
+  position: absolute; left: 14px; top: 12px; display: grid; gap: 3px; font-family: var(--f-mono); font-size: 12px;
+  color: var(--ink-2); font-variant-numeric: tabular-nums; pointer-events: none;
+}
+.ex-hud .tval { font-size: 15px; color: var(--ink); }
+.ex-hud .key { display: inline-flex; align-items: center; gap: 6px; }
+.ex-hud .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.inset-label { position: absolute; font-family: var(--f-mono); font-size: 11px; color: var(--muted); pointer-events: none; text-align: center; }
+.ex-foot { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px 16px; align-items: center; padding: 12px 14px 14px; border-top: 1px solid var(--rule); }
+.speed { display: inline-flex; border: 1px solid var(--rule); border-radius: var(--radius); overflow: hidden; }
+.speed button {
+  appearance: none; border: 0; border-right: 1px solid var(--rule); background: var(--sheet); color: var(--ink-2); cursor: pointer;
+  font-family: var(--f-mono); font-size: 13px; padding: 7px 11px; font-variant-numeric: tabular-nums;
+}
+.speed button:last-child { border-right: 0; }
+.speed button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+.play {
+  width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--ink); background: var(--sheet); color: var(--ink);
+  display: grid; place-items: center; cursor: pointer;
+}
+.play svg { width: 14px; height: 14px; }
+input[type="range"] { width: 100%; accent-color: var(--violet); }
+
+.steps3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; margin-top: 30px; }
+.steps3 > div { display: grid; gap: 8px; align-content: start; min-width: 0; }
+.steps3 .n { font-family: var(--f-mono); font-size: 12px; color: var(--muted); letter-spacing: 0.08em; }
+.steps3 h3 { display: flex; align-items: center; gap: 8px; }
+.steps3 h3 i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; flex: none; }
+.steps3 p { font-size: 16px; color: var(--ink-2); }
+.eq { font-family: "Times New Roman", Georgia, serif; font-style: italic; font-size: 17px; color: var(--ink); white-space: nowrap; }
+
+.why { margin-top: 36px; display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: 28px; align-items: center; }
+.bars { display: grid; gap: 10px; }
+.bar-row { display: grid; grid-template-columns: minmax(0, 11.5em) minmax(0, 1fr) 3.4em; gap: 12px; align-items: center; font-size: 15px; }
+.bar-track { height: 14px; background: var(--grid); border-radius: 0 4px 4px 0; position: relative; }
+.bar-fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 0 4px 4px 0; min-width: 2px; }
+.bar-val { font-family: var(--f-mono); font-size: 13px; text-align: right; font-variant-numeric: tabular-nums; }
+
+details.figure { margin-top: 32px; border-top: 1px solid var(--rule); padding-top: 14px; }
+details.figure summary { cursor: pointer; font-weight: 600; color: var(--ink); }
+.plate { background: var(--plate); border-radius: var(--radius); padding: 12px; margin-top: 12px; }
+.plate img { display: block; width: 100%; height: auto; }
+
+/* ---------- dataset ---------- */
+.ds { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px; align-items: start; }
+.ds table { width: 100%; border-collapse: collapse; font-size: 15.5px; font-variant-numeric: tabular-nums; }
+.ds th, .ds td { text-align: left; padding: 8px 10px 8px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+.ds th { font-family: var(--f-mono); font-weight: 500; font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.ds td:first-child { color: var(--muted); }
+.ds td.ours { color: var(--ink); font-weight: 600; }
+
+/* ---------- results ---------- */
+.res-controls { display: flex; flex-wrap: wrap; gap: 10px 24px; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.seg { display: inline-flex; border: 1px solid var(--rule); border-radius: var(--radius); overflow: hidden; background: var(--sheet); }
+.seg button {
+  appearance: none; border: 0; background: transparent; padding: 7px 13px; font-family: var(--f-body); font-size: 14.5px;
+  color: var(--ink-2); cursor: pointer; border-right: 1px solid var(--rule);
+}
+.seg button:last-child { border-right: 0; }
+.seg button[aria-selected="true"], .seg button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+.seg.small button { font-family: var(--f-mono); font-size: 12.5px; padding: 6px 10px; }
+.restable { display: grid; gap: 0; background: var(--sheet); border: 1px solid var(--rule); border-radius: var(--radius); }
+.rrow {
+  display: grid; grid-template-columns: minmax(0, 13em) minmax(0, 1fr) 5.2em 5.2em 5.2em; gap: 12px; align-items: center;
+  padding: 9px 14px; border-bottom: 1px solid var(--rule); font-variant-numeric: tabular-nums;
+}
+.rrow:last-child { border-bottom: 0; }
+.rrow.head { font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); padding-block: 8px; }
+.rrow .num { font-family: var(--f-mono); font-size: 13px; text-align: right; color: var(--ink-2); }
+.rrow.head .num { font-size: 11px; }
+.rrow .mname { font-size: 15.5px; line-height: 1.25; }
+.rrow .mname small { display: block; font-family: var(--f-mono); font-size: 11px; color: var(--muted); }
+.rrow.ours { background: var(--violet-soft); }
+.rrow.ours .mname { font-weight: 600; }
+.rrow.ours .num { color: var(--ink); font-weight: 500; }
+.hbar { display: grid; grid-template-columns: minmax(0, 1fr) 3.2em; gap: 10px; align-items: center; }
+.hbar .bar-track { height: 12px; }
+.hbar .bar-val { color: var(--ink); }
+.rrow.na .bar-track { background: transparent; border: 1px dashed var(--rule); }
+.res-note { margin-top: 10px; }
+.restable.hl .rrow { grid-template-columns: minmax(0, 13em) minmax(0, 1fr) 5.2em 5.2em 5.2em; }
+
+.chart-wrap { margin-top: 44px; display: grid; gap: 12px; }
+.chart-legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 14px; color: var(--ink-2); }
+.chart-legend span { display: inline-flex; align-items: center; gap: 7px; }
+.chart-legend svg { width: 26px; height: 10px; }
+.chart { position: relative; background: var(--sheet); border: 1px solid var(--rule); border-radius: var(--radius); padding: 8px 8px 4px; }
+.chart svg { display: block; width: 100%; height: auto; }
+.chart text { font-family: var(--f-mono); font-size: 11px; fill: var(--muted); }
+.tip {
+  position: absolute; pointer-events: none; background: var(--sheet); border: 1px solid var(--rule); border-radius: var(--radius);
+  padding: 8px 10px; font-size: 13px; line-height: 1.45; box-shadow: 0 6px 18px rgba(20, 16, 40, 0.12); min-width: 13em;
+  font-variant-numeric: tabular-nums;
+}
+.tip .tt { font-family: var(--f-mono); font-size: 11.5px; color: var(--muted); margin-bottom: 4px; }
+.tip .tr { display: grid; grid-template-columns: 12px minmax(0, 1fr) auto; gap: 8px; align-items: center; }
+.tip .tr i { width: 10px; height: 3px; border-radius: 2px; }
+.tip .tr b { font-family: var(--f-mono); font-weight: 500; font-size: 12px; }
+
+.compare-block { margin-top: 44px; display: grid; gap: 12px; }
+.compare {
+  position: relative; width: 100%; max-width: 100%; background: var(--plate); border-radius: var(--radius); overflow: hidden;
+  user-select: none; touch-action: pan-y; cursor: ew-resize; --pos: 50%;
+}
+.compare img { display: block; width: 100%; height: auto; pointer-events: none; }
+.compare .c-left { position: absolute; inset: 0; clip-path: inset(0 calc(100% - var(--pos)) 0 0); }
+.compare .c-left img { width: 100%; height: 100%; object-fit: cover; }
+.compare .c-line { position: absolute; top: 0; bottom: 0; left: var(--pos); width: 0; border-left: 1.5px solid #221E33; }
+.compare .c-grip {
+  position: absolute; top: 50%; left: var(--pos); transform: translate(-50%, -50%); width: 30px; height: 30px; border-radius: 50%;
+  background: #FFFFFF; border: 1.5px solid #221E33; display: grid; place-items: center; color: #221E33;
+}
+.compare .c-grip svg { width: 14px; height: 14px; }
+.compare:focus-visible { outline: 2px solid var(--violet); outline-offset: 3px; }
+.compare .c-tag {
+  position: absolute; top: 10px; font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.9); color: #221E33; padding: 3px 7px; border-radius: 3px; pointer-events: none;
+}
+.compare .c-tag.l { left: 10px; } .compare .c-tag.r { right: 10px; }
+.compare.narrow { max-width: 560px; }
+.cmp-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 24px; align-items: start; }
+.thumbs { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+.thumb { appearance: none; padding: 0; border: 2px solid transparent; border-radius: 4px; overflow: hidden; cursor: pointer; background: var(--plate); }
+.thumb img { display: block; width: 100%; aspect-ratio: 3 / 2; object-fit: cover; }
+.thumb[aria-pressed="true"] { border-color: var(--violet); }
+.key-row { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 14px; color: var(--ink-2); }
+.key-row span { display: inline-flex; align-items: center; gap: 6px; }
+
+/* ---------- footer ---------- */
+footer { padding-block: 48px 56px; color: var(--muted); font-size: 14px; }
+footer .wrap { border-top: 1px solid var(--rule); padding-top: 18px; display: grid; gap: 6px; }
+
+@media (max-width: 900px) {
+  .ex-say { position: static; width: auto; margin: 14px 14px 0; }
+  .ex-say .h { font-size: 21px; }
+  .ex-say p { font-size: 16px; }
+}
+@media (max-width: 860px) {
+  .glance-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .why, .ds, .cmp-grid { grid-template-columns: minmax(0, 1fr); }
+  .steps3 { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+}
+@media (max-width: 640px) {
+  body { font-size: 16px; }
+  .masthead .wrap { padding-block: 44px 28px; }
+  .viewer { aspect-ratio: 1 / 1; }
+  .glance-grid { gap: 10px; }
+  .ex-steps { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .ex-step { padding: 10px 2px 16px; font-size: 0; }
+  .ex-step b { font-size: 12px; margin: 0; text-align: center; }
+  .ex-stage { aspect-ratio: 1 / 1; }
+  .rrow, .restable.hl .rrow { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .rrow .num { display: none; }
+  .rrow.head > span:first-child { display: none; }
+  .ex-hud { font-size: 11px; left: 10px; top: 8px; gap: 1px; }
+  .ex-hud .tval { font-size: 13px; }
+  .bar-row { grid-template-columns: minmax(0, 1fr) 3.4em; }
+  .bar-row .bar-track { grid-column: 1 / -1; grid-row: 2; }
+  .thumbs { gap: 4px; }
+}
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } .ex-say.in { animation: none; } }
+</style>
+
+</head>
+<body>
+<header class="masthead">
+  <div class="wrap">
+    <h1 class="title">House<span class="flow">Flow</span></h1>
+    <p class="subtitle">Reconstructing Building Interior Layouts as 3D Graphs with Multimodal Flow Matching</p>
+    <nav class="links" aria-label="Paper resources">
+      <span class="btn" aria-disabled="true" title="Coming soon">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M4 1.5h5.5L13 5v9.5H4z"/><path d="M9.5 1.5V5H13"/><path d="M6 8.5h5M6 11h5"/></svg>
+        Paper <span class="soon">soon</span></span>
+      <span class="btn" aria-disabled="true" title="Coming soon">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M3 2.5h7l3 3v8H3z"/><path d="M5.5 7h5M5.5 9.5h5M5.5 12h3"/></svg>
+        Supplementary <span class="soon">soon</span></span>
+      <span class="btn" aria-disabled="true" title="Coming soon">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M5.5 4 2 8l3.5 4M10.5 4 14 8l-3.5 4"/></svg>
+        Code <span class="soon">soon</span></span>
+      <span class="btn" aria-disabled="true" title="Coming soon">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><ellipse cx="8" cy="3.5" rx="5" ry="2"/><path d="M3 3.5v9c0 1.1 2.2 2 5 2s5-.9 5-2v-9M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/></svg>
+        HouseScan-100K <span class="soon">soon</span></span>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <!-- ======================= teaser ======================= -->
+  <section class="teaser" aria-label="Teaser">
+    <div class="wrap">
+      <figure>
+        <img src="assets/img/teaser.webp" width="2141" height="953" alt="Three HouseScan-100K test buildings. Top: colour-coded input scans. Bottom: the 3D layout graphs HouseFlow predicts, with walls, doors, windows and stairs, including a spiral and an L-shaped staircase in close-ups.">
+        <figcaption><b>HouseFlow reconstructs building interiors as 3D layout graphs.</b> Top: input scans of HouseScan-100K test buildings. Bottom: our graphs (<span class="cdot" style="background: var(--wall)"></span>walls, <span class="cdot" style="background: var(--door)"></span>doors, <span class="cdot" style="background: var(--window)"></span>windows, <span class="cdot" style="background: var(--stair)"></span>stairs) with several storeys, stairs, sloped ceilings and non-Manhattan walls. A conditional flow model generates two modalities jointly: continuous corner positions, and discrete connectivity and classes.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ======================= tl;dr ======================= -->
+  <section aria-labelledby="tldr-h">
+    <div class="wrap tldr">
+      <div class="sec-head"><h2 id="tldr-h">Overview</h2><span class="dim"></span></div>
+      <p class="prose">We reconstruct the interior layout of a building as a 3D graph of corners and edges, without a predefined vocabulary of primitives. A source distribution conditioned on the scan places samples near the corners. A multimodal flow then refines the sample positions and jointly predicts which samples exist, their classes and their edges, in two steps.</p>
+      <figure class="glance">
+        <div class="chart-legend" id="glance-legend"></div>
+        <div class="glance-grid" id="glance"></div>
+        <figcaption class="note">Test sets. HSS is the harmonic mean of corner F1 and edge IoU at the given tolerance. SceneScript* and SpatialLM* are our 1&nbsp;cm-token variants of the baselines, RoomFormer* uses a 512&nbsp;px density map; n/a: the method cannot represent multi-storey buildings. Run time: median over the largest HouseScan-100K test buildings (about 1,000 corners). Full tables under Results.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ======================= hero viewer ======================= -->
+  <section class="hero" aria-labelledby="hero-h">
+    <div class="wrap">
+      <div class="sec-head"><h2 id="hero-h">Explore in 3D</h2><span class="dim"></span></div>
+      <div class="viewer" id="viewer">
+        <canvas id="viewer-canvas" aria-label="3D view of a test building: input scan on the left of the divider, predicted layout graph on the right"></canvas>
+        <span class="side-label l">Input scan</span>
+        <span class="side-label r">HouseFlow graph</span>
+        <div class="split" id="split" role="slider" tabindex="0" aria-label="Divider between scan and graph" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
+          <span class="grip"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 3 1.5 7 5 11M9 3l3.5 4L9 11"/></svg></span>
+        </div>
+        <div class="viewer-status" id="viewer-status">Loading scan…</div>
+      </div>
+      <div class="viewer-bar">
+        <div class="chips" role="radiogroup" aria-label="Test building" id="scene-chips">
+          <button class="chip" role="radio" aria-checked="false" data-key="ase">ASE · one floor</button>
+          <button class="chip" role="radio" aria-checked="false" data-key="roofs">Sloped ceilings</button>
+          <button class="chip" role="radio" aria-checked="false" data-key="stairs">Spiral stairs</button>
+          <button class="chip" role="radio" aria-checked="true" data-key="three">Three storeys</button>
+          <button class="chip" role="radio" aria-checked="false" data-key="four">Four storeys</button>
+        </div>
+        <div class="readout" id="viewer-readout">&nbsp;</div>
+      </div>
+      <div class="hero-caption">
+        <p class="note">Test buildings from HouseScan-100K and ASE, picked by hand and never seen in training. Drag the divider to compare the scan with the predicted graph. Drag the building to orbit, scroll or pinch to zoom.</p>
+        <div class="legend" aria-label="Classes">
+          <span><i style="background: var(--wall)"></i>wall</span>
+          <span><i style="background: var(--door)"></i>door</span>
+          <span><i style="background: var(--window)"></i>window</span>
+          <span><i style="background: var(--stair)"></i>stair</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= abstract ======================= -->
+  <section aria-labelledby="abs-h">
+    <div class="wrap">
+      <div class="sec-head"><h2 id="abs-h">Abstract</h2><span class="dim"></span></div>
+      <p class="prose">Autoregressive methods achieve the best results in reconstructing structured 3D layouts from indoor scans, but they rely on a handcrafted vocabulary of primitives that must be extended for every new type of structure. We ask whether such layouts can be learned without predefined primitives. HouseFlow represents a building as a graph and generates it with a multimodal flow that jointly predicts continuous vertex positions and discrete classes and edges. Because a flow from random noise fails to place the corners precisely, we learn a scan-conditioned source distribution that starts the flow close to the corners. HouseFlow outperforms all baselines on ASE and on HouseScan-100K, our new multi-story benchmark, more than doubling the score at a 1&nbsp;cm tolerance on the latter while running up to 48 times faster than the best competitor on large buildings. On real scans, zero-shot, it more than triples the score of the best baseline at a 10&nbsp;cm tolerance. Code and datasets will be released.</p>
+    </div>
+  </section>
+
+  <!-- ======================= method ======================= -->
+  <section aria-labelledby="method-h">
+    <div class="wrap">
+      <div class="sec-head"><h2 id="method-h">How it works</h2><span class="dim"></span></div>
+      <p class="lede prose" style="margin-bottom: 24px">The output is a graph: <span class="eq">K</span> candidate corners, each with a 3D position, an existence flag, a class (wall, door, window, stair) and edges to other corners. Everything else, geometry and connectivity, is learned from data.</p>
+
+      <div class="explainer" id="explainer">
+        <div class="ex-steps" role="tablist" aria-label="Pipeline stage" id="ex-steps"></div>
+        <div class="ex-body">
+          <div class="ex-say" id="ex-say" aria-live="polite">
+            <span class="k" id="ex-say-k">&nbsp;</span>
+            <span class="h" id="ex-say-h">&nbsp;</span>
+            <p id="ex-say-p">&nbsp;</p>
+          </div>
+          <div class="ex-stage">
+            <canvas id="ex-canvas" aria-label="Animation of HouseFlow on an ASE test scene"></canvas>
+            <div class="ex-hud" id="ex-hud" aria-live="off"></div>
+            <div class="inset-label" id="ex-inset-label"></div>
+          </div>
+        </div>
+        <div class="ex-foot">
+          <button class="play" id="ex-play" aria-label="Play">
+            <svg viewBox="0 0 14 14" aria-hidden="true"><path id="ex-play-icon" d="M3 1.5v11l9-5.5z" fill="currentColor"/></svg>
+          </button>
+          <input type="range" id="ex-scrub" min="0" max="13500" step="10" value="13500" aria-label="Animation time">
+          <div class="speed" role="group" aria-label="Playback speed" id="ex-speed">
+            <button type="button" data-v="0.5" aria-pressed="false">0.5×</button>
+            <button type="button" data-v="1" aria-pressed="true">1×</button>
+            <button type="button" data-v="2" aria-pressed="false">2×</button>
+          </div>
+        </div>
+      </div>
+      <p class="note" style="margin-top: 10px">Real output of the final model on ASE test scene 77711: source density, start and end positions, existence probabilities, classes and edges all come from one forward pass. Paths between start and end are drawn straight, and the order in which decisions appear is illustrative. Click a stage above to jump to it, and drag the scene sideways to turn it.</p>
+
+      <div class="steps3">
+        <div>
+          <span class="n">STEP 1</span>
+          <h3><i style="background: var(--gold)"></i>Learned source distribution</h3>
+          <p>A Sonata point encoder and a transformer over 50&nbsp;cm columns predict where corners are: a probability <span class="eq">p(c, b) = p(c) p(b | c)</span> over columns and over 5×5×5 bins of 10&nbsp;cm inside each column. We draw an over-complete sample set from it: the strongest peaks plus systematic draws from the remaining mass.</p>
+        </div>
+        <div>
+          <span class="n">STEP 2</span>
+          <h3><i style="background: var(--magenta)"></i>Multimodal flow</h3>
+          <p>Each sample is a token. Its position follows a straight continuous flow <span class="eq">x<sub>t</sub> = (1−t) x<sub>0</sub> + t x<sub>1</sub></span> to its matched corner. Existence, class and edges follow a discrete masking path that reveals each clean value with probability <span class="eq">t</span>. Twelve time-conditioned transformer layers refine all of them jointly.</p>
+        </div>
+        <div>
+          <span class="n">STEP 3</span>
+          <h3><i style="background: var(--violet)"></i>Two steps to a graph</h3>
+          <p>Samples start at their bin centres. Two Euler steps on <span class="eq">t = 0 → ½ → 1</span> move them onto the corners. The most confident existence decisions come first, and the second pass decides the rest and can revise them. Edges are scored only between kept corners.</p>
+        </div>
+      </div>
+
+      <div class="why">
+        <div class="stack">
+          <h3>Why learn the source?</h3>
+          <p style="color: var(--ink-2); font-size: 16px">A flow from uniform noise starts metres away from corners that must be placed within centimetres. The learned source finds the corners, and the flow places them. Its samples come within the flow's 25&nbsp;cm capture radius of 98.4% of ASE corners and 99.8% of HouseScan-100K corners.</p>
+        </div>
+        <figure class="stack" style="margin: 0">
+          <div class="bars" role="img" aria-label="Corner F1 at 2 cm: learned source and flow 77.2, learned source samples without flow 2.2, uniform source and flow 0.2">
+            <div class="bar-row"><span><b>Learned source + flow</b></span><span class="bar-track"><span class="bar-fill" style="width: 77.2%; background: var(--violet)"></span></span><span class="bar-val"><b>77.2</b></span></div>
+            <div class="bar-row"><span>Learned source, no flow</span><span class="bar-track"><span class="bar-fill" style="width: 2.2%; background: var(--gold)"></span></span><span class="bar-val">2.2</span></div>
+            <div class="bar-row"><span>Uniform source + flow</span><span class="bar-track"><span class="bar-fill" style="width: 0.2%; background: var(--rf)"></span></span><span class="bar-val">0.2</span></div>
+          </div>
+          <figcaption class="note">Corner F1 at 2&nbsp;cm, 1,000 ASE validation scenes, 28k training steps.</figcaption>
+        </figure>
+      </div>
+
+      <details class="figure">
+        <summary>Show the full architecture figure</summary>
+        <div class="plate"><img src="assets/img/method_overview.webp" alt="Architecture: Sonata encoder, source distribution network with column transformer and K sample draws, joint flow model with 12 DiT blocks run twice, and thresholded outputs forming the graph" loading="lazy" width="2000" height="725"></div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ======================= dataset ======================= -->
+  <section aria-labelledby="ds-h">
+    <div class="wrap">
+      <div class="sec-head"><h2 id="ds-h">HouseScan-100K</h2><span class="dim"></span></div>
+      <div class="ds">
+        <div class="stack">
+          <p class="prose">A new scan benchmark that goes beyond single-storey Manhattan layouts. It builds on the building shells and floor plans of SynBuild3D. We connect storeys with straight, L-shaped, U-shaped and spiral staircases, add furniture for realistic occlusion, simulate an egocentric walk-through scan and extract the ground-truth layout graph of the interior.</p>
+          <p class="note">Split: 90,396 training, 5,460 validation and 5,460 test buildings.</p>
+        </div>
+        <table>
+          <thead><tr><th scope="col"></th><th scope="col">HouseScan-100K</th><th scope="col">ASE</th></tr></thead>
+          <tbody>
+            <tr><td>Scenes</td><td class="ours">101,316</td><td>100k</td></tr>
+            <tr><td>Storeys</td><td class="ours">3.3 on average</td><td>1</td></tr>
+            <tr><td>Rooms</td><td class="ours">15.9</td><td>2.1</td></tr>
+            <tr><td>Graph corners</td><td class="ours">703</td><td>53</td></tr>
+            <tr><td>Stairs</td><td class="ours">straight, L, U, spiral</td><td>none</td></tr>
+            <tr><td>Geometry</td><td class="ours">non-Manhattan rooms, sloped ceilings, gables, roof windows</td><td>Manhattan walls</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= results ======================= -->
+  <section aria-labelledby="res-h">
+    <div class="wrap">
+      <div class="sec-head"><h2 id="res-h">Results</h2><span class="dim"></span></div>
+      <p class="prose" style="margin-bottom: 22px">We compare against a floor-plan method (RoomFormer) and two autoregressive structured-language methods (SceneScript, SpatialLM), all retrained on the same data. Variants marked * are ours, with finer coordinate tokens to give the baselines centimetre resolution. HSS is the harmonic mean of corner F1 and edge IoU at a tolerance <span class="eq">r</span>.</p>
+
+      <div class="res-controls">
+        <div class="seg" role="tablist" aria-label="Benchmark" id="res-tabs">
+          <button role="tab" aria-selected="false" data-ds="ase">ASE</button>
+          <button role="tab" aria-selected="true" data-ds="hs">HouseScan-100K</button>
+          <button role="tab" aria-selected="false" data-ds="hl">HouseLayout3D (real)</button>
+        </div>
+        <div class="seg small" aria-label="Tolerance" id="res-thr"></div>
+      </div>
+      <div class="restable" id="restable" role="table" aria-label="Benchmark results"></div>
+      <p class="note res-note" id="res-note"></p>
+
+      <div class="chart-wrap">
+        <h3>Inference time and building size</h3>
+        <div class="chart-legend" id="rt-legend"></div>
+        <div class="chart" id="rt-chart"></div>
+        <p class="note">Median inference time per HouseScan-100K test building, in six size groups of 150 timed buildings, log scale. Hover or tap for the times at one size. The autoregressive decoders write one token at a time, so their time grows with the number of corners.</p>
+      </div>
+
+      <div class="compare-block">
+        <h3>Qualitative comparison</h3>
+        <div class="cmp-grid">
+          <div class="stack">
+            <p style="color: var(--ink-2); font-size: 16px">Test scenes with close-ups. Drag across the image to compare HouseFlow (right) with a baseline or the ground truth (left). Both baselines are our 1&nbsp;cm-token variants.</p>
+            <div class="stack" style="gap: 8px">
+              <span class="note">Scene</span>
+              <div class="chips" id="q-scene">
+                <button class="chip" aria-pressed="true" data-s="hs100k_b">HouseScan-100K · stairs</button>
+                <button class="chip" aria-pressed="false" data-s="hs100k_a">HouseScan-100K · roof</button>
+                <button class="chip" aria-pressed="false" data-s="ase_a">ASE · 1</button>
+                <button class="chip" aria-pressed="false" data-s="ase_b">ASE · 2</button>
+              </div>
+            </div>
+            <div class="stack" style="gap: 8px">
+              <span class="note">Left side</span>
+              <div class="chips" id="q-left">
+                <button class="chip" aria-pressed="true" data-m="scenescript">SceneScript*</button>
+                <button class="chip" aria-pressed="false" data-m="spatiallm">SpatialLM*</button>
+                <button class="chip" aria-pressed="false" data-m="gt">Scan + ground truth</button>
+              </div>
+            </div>
+            <div class="key-row">
+              <span><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 2l8 8M10 2l-8 8" stroke="#C62828" stroke-width="2"/></svg>false-positive corner</span>
+              <span><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>missed corner (10&nbsp;cm)</span>
+              <span>close-ups: ground truth in grey</span>
+            </div>
+          </div>
+          <div class="compare" id="q-compare" tabindex="0" role="slider" aria-label="Comparison divider" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
+            <img id="q-right" src="assets/img/qual_hs100k_b_ours.webp" alt="HouseFlow prediction" width="777" height="759">
+            <div class="c-left"><img id="q-left-img" src="assets/img/qual_hs100k_b_scenescript.webp" alt="Baseline prediction"></div>
+            <span class="c-line"></span>
+            <span class="c-grip"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 3 1.5 7 5 11M9 3l3.5 4L9 11"/></svg></span>
+            <span class="c-tag l" id="q-left-tag">SceneScript*</span>
+            <span class="c-tag r">HouseFlow</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="compare-block">
+        <h3>Real scans, zero-shot</h3>
+        <div class="cmp-grid">
+          <div class="stack">
+            <p style="color: var(--ink-2); font-size: 16px">HouseLayout3D has 16 annotated real multi-storey buildings from Matterport3D and no training split, so all models are trained on HouseScan-100K only. The real scans are noisy and incomplete, and all methods score lower than on synthetic data (HouseLayout3D tab above). Real layout reconstruction remains hard, and larger real training sets are needed.</p>
+            <div class="thumbs" id="hl-thumbs" aria-label="Real scan"></div>
+          </div>
+          <div class="compare" id="hl-compare" tabindex="0" role="slider" aria-label="Comparison divider" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
+            <img id="hl-right" src="assets/img/hl3d_r47D5H71a5s_h0_ours.webp" alt="HouseFlow graph over the real scan" width="1200" height="800">
+            <div class="c-left"><img id="hl-left" src="assets/img/hl3d_r47D5H71a5s_h0_scan.webp" alt="Real scan"></div>
+            <span class="c-line"></span>
+            <span class="c-grip"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 3 1.5 7 5 11M9 3l3.5 4L9 11"/></svg></span>
+            <span class="c-tag l">Real scan</span>
+            <span class="c-tag r">HouseFlow</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>Code, models and HouseScan-100K will be released.</p>
+    <p>HouseScan-100K builds on SynBuild3D. HouseLayout3D scans come from Matterport3D.</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/lines/LineSegmentsGeometry.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/lines/LineMaterial.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/lines/LineSegments2.js"></script>
+<script>
+(function () {
+  "use strict";
+  const REDUCE = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const themeListeners = [];
+  const onTheme = (fn) => themeListeners.push(fn);
+  const fireTheme = () => themeListeners.forEach((fn) => { try { fn(); } catch (e) { console.error(e); } });
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", fireTheme);
+  new MutationObserver(fireTheme).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  const hexToRgb = (h) => {
+    h = h.replace("#", "");
+    if (h.length === 3) h = h.split("").map((c) => c + c).join("");
+    const n = parseInt(h, 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  };
+  const mix = (a, b, t) => a.map((v, i) => v + (b[i] - v) * t);
+  const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+  const ease = (x) => { x = clamp(x); return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+  const fmt = (v, d = 1) => (v == null ? "–" : v.toFixed(d));
+  const CLASS_TOK = ["--wall", "--door", "--window", "--stair"];
+
+  /* ============================ hero 3D viewer ============================ */
+  (function hero() {
+    const host = document.getElementById("viewer");
+    const canvas = document.getElementById("viewer-canvas");
+    const status = document.getElementById("viewer-status");
+    const readout = document.getElementById("viewer-readout");
+    const splitEl = document.getElementById("split");
+    const chips = Array.from(document.querySelectorAll("#scene-chips .chip"));
+    const META = {
+      ase: { label: "ASE test scene", az: -60 }, roofs: { label: "HouseScan-100K test building", az: -60 },
+      stairs: { label: "HouseScan-100K test building", az: -60 }, three: { label: "HouseScan-100K test building", az: -60 },
+      four: { label: "HouseScan-100K test building", az: -60 },
+    };
+    let split = 0.5;
+    const setSplit = (v) => {
+      split = clamp(v, 0, 1);
+      host.style.setProperty("--split", split);
+      splitEl.setAttribute("aria-valuenow", Math.round(split * 100));
+    };
+    setSplit(0.5);
+    const startDrag = (ev) => {
+      ev.preventDefault();
+      splitEl.setPointerCapture(ev.pointerId);
+      const move = (e) => { const r = host.getBoundingClientRect(); setSplit((e.clientX - r.left) / r.width); };
+      const up = () => { splitEl.removeEventListener("pointermove", move); splitEl.removeEventListener("pointerup", up); splitEl.removeEventListener("pointercancel", up); };
+      splitEl.addEventListener("pointermove", move); splitEl.addEventListener("pointerup", up); splitEl.addEventListener("pointercancel", up);
+    };
+    splitEl.addEventListener("pointerdown", startDrag);
+    splitEl.addEventListener("keydown", (e) => {
+      const step = e.shiftKey ? 0.1 : 0.03;
+      if (e.key === "ArrowLeft") { setSplit(split - step); e.preventDefault(); }
+      if (e.key === "ArrowRight") { setSplit(split + step); e.preventDefault(); }
+      if (e.key === "Home") { setSplit(0); e.preventDefault(); }
+      if (e.key === "End") { setSplit(1); e.preventDefault(); }
+    });
+
+    if (!window.THREE || !THREE.OrbitControls || !THREE.LineSegments2) {
+      status.textContent = "The 3D viewer could not load its library. The figures below show the same results.";
+      return;
+    }
+    let renderer;
+    try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true }); }
+    catch (e) { status.textContent = "The 3D viewer needs WebGL, which this browser has turned off."; return; }
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setClearColor(0x000000, 0);
+    const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 400);
+    camera.up.set(0, 0, 1);
+    const controls = new THREE.OrbitControls(camera, canvas);
+    controls.enableDamping = true; controls.dampingFactor = 0.08; controls.enablePan = false;
+    controls.rotateSpeed = 0.7; controls.zoomSpeed = 0.8;
+    controls.autoRotate = !REDUCE; controls.autoRotateSpeed = 0.45;
+    controls.addEventListener("start", () => { controls.autoRotate = false; });
+    const sceneL = new THREE.Scene(), sceneR = new THREE.Scene();
+    const lineMat = new THREE.LineMaterial({ linewidth: 1.7, vertexColors: true, dashed: false });
+    const cache = {};
+    let cur = null, wanted = null;
+
+    function colours(rec) {
+      const a = hexToRgb(css("--pt-a")), b = hexToRgb(css("--pt-b"));
+      const pos = rec.geo.attributes.position.array, n = pos.length / 3;
+      const col = new Float32Array(n * 3);
+      const z0 = rec.zmin, dz = Math.max(1e-6, rec.zmax - rec.zmin);
+      for (let i = 0; i < n; i++) {
+        const c = mix(a, b, clamp((pos[3 * i + 2] - z0) / dz));
+        col[3 * i] = c[0] / 255; col[3 * i + 1] = c[1] / 255; col[3 * i + 2] = c[2] / 255;
+      }
+      rec.geo.setAttribute("color", new THREE.BufferAttribute(col, 3));
+      const cls = CLASS_TOK.map((t) => hexToRgb(css(t)).map((v) => v / 255));
+      const ecol = new Float32Array(rec.edges.length * 6);
+      rec.edges.forEach(([i, j], k) => {
+        let c = rec.cls[i];
+        if (c === 0 && rec.cls[j] !== 0) c = rec.cls[j];
+        const rgb = cls[c] || cls[0];
+        ecol.set(rgb, 6 * k); ecol.set(rgb, 6 * k + 3);
+      });
+      rec.lineGeo.setColors(ecol);
+      const vcol = new Float32Array(rec.verts.length * 3);
+      rec.cls.forEach((c, k) => vcol.set(cls[c] || cls[0], 3 * k));
+      rec.cornerGeo.setAttribute("color", new THREE.BufferAttribute(vcol, 3));
+    }
+
+    function build(raw) {
+      const bin = atob(raw.pts), bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      const q = new Int16Array(bytes.buffer), pos = new Float32Array(q.length);
+      let zmin = Infinity, zmax = -Infinity;
+      for (let i = 0; i < q.length; i++) pos[i] = q[i] / 1000;
+      const zs = [];
+      for (let i = 2; i < pos.length; i += 3) zs.push(pos[i]);
+      zs.sort((x, y) => x - y);
+      zmin = zs[Math.floor(zs.length * 0.01)]; zmax = zs[Math.floor(zs.length * 0.99)];
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+      const verts = raw.verts.map((v) => v.map((x) => x / 1000));
+      const seg = new Float32Array(raw.edges.length * 6);
+      raw.edges.forEach(([i, j], k) => { seg.set(verts[i], 6 * k); seg.set(verts[j], 6 * k + 3); });
+      const lineGeo = new THREE.LineSegmentsGeometry(); lineGeo.setPositions(seg);
+      const cornerGeo = new THREE.BufferGeometry();
+      cornerGeo.setAttribute("position", new THREE.BufferAttribute(new Float32Array(verts.flat()), 3));
+      // framing box: the predicted graph (the scan can carry stray points far outside the building)
+      const vlo = [0, 1, 2].map((k) => Math.min(...verts.map((v) => v[k]))), vhi = [0, 1, 2].map((k) => Math.max(...verts.map((v) => v[k])));
+      const box = { size: vhi.map((h, k) => h - vlo[k]), centre: vhi.map((h, k) => (h + vlo[k]) / 2) };
+      const rec = { ...raw, geo, lineGeo, cornerGeo, verts, zmin, zmax, box };
+      colours(rec);
+      rec.left = new THREE.Points(geo, new THREE.PointsMaterial({ size: 1.6, sizeAttenuation: false, vertexColors: true }));
+      rec.faint = new THREE.Points(geo, new THREE.PointsMaterial({ size: 1.3, sizeAttenuation: false, vertexColors: true, transparent: true, opacity: 0.16, depthWrite: false }));
+      rec.lines = new THREE.LineSegments2(lineGeo, lineMat);
+      rec.corners = new THREE.Points(cornerGeo, new THREE.PointsMaterial({ size: 3.6, sizeAttenuation: false, vertexColors: true }));
+      return rec;
+    }
+
+    function frame(rec) {
+      const sz = rec.box.size, r = 0.5 * Math.hypot(sz[0], sz[1], sz[2]), diag = Math.hypot(sz[0], sz[1]), c = rec.box.centre;
+      const az = (META[rec.key].az * Math.PI) / 180, el = (24 * Math.PI) / 180;
+      const aspect = canvas.clientWidth / Math.max(1, canvas.clientHeight);
+      const tn = Math.tan((camera.fov * Math.PI) / 360);
+      const vext = sz[2] * Math.cos(el) + diag * Math.sin(el);
+      const d = Math.max(vext / (2 * tn), diag / (2 * tn * aspect)) * 0.98 + 0.3 * diag;
+      camera.position.set(c[0] + d * Math.cos(el) * Math.cos(az), c[1] + d * Math.cos(el) * Math.sin(az), c[2] + d * Math.sin(el));
+      controls.target.set(c[0], c[1], c[2]);
+      controls.minDistance = r * 0.6; controls.maxDistance = d * 2.2;
+      camera.near = d / 50; camera.far = d * 6; camera.updateProjectionMatrix();
+      controls.update();
+    }
+
+    function show(rec) {
+      sceneL.clear(); sceneR.clear();
+      sceneL.add(rec.left); sceneR.add(rec.faint, rec.lines, rec.corners);
+      cur = rec; frame(rec);
+      status.hidden = true;
+      const sz = rec.size;
+      readout.textContent = `${META[rec.key].label} · ${sz[0].toFixed(0)} × ${sz[1].toFixed(0)} m · ${rec.gt_corners.toLocaleString("en-US")} ground-truth corners`;
+    }
+
+    function select(key) {
+      chips.forEach((c) => c.setAttribute("aria-checked", String(c.dataset.key === key)));
+      wanted = key;
+      if (cache[key]) { show(cache[key]); return; }
+      status.hidden = false; status.textContent = "Loading scan…";
+      fetch(`assets/scenes/${key}.json`).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then((raw) => { cache[key] = build(raw); if (wanted === key) show(cache[key]); })
+        .catch(() => { if (wanted === key) { status.hidden = false; status.textContent = "This scene did not load. Try another building."; } });
+    }
+    chips.forEach((c) => c.addEventListener("click", () => select(c.dataset.key)));
+    document.getElementById("scene-chips").addEventListener("keydown", (e) => {
+      const i = chips.findIndex((c) => c.getAttribute("aria-checked") === "true");
+      let j = null;
+      if (e.key === "ArrowRight" || e.key === "ArrowDown") j = (i + 1) % chips.length;
+      if (e.key === "ArrowLeft" || e.key === "ArrowUp") j = (i - 1 + chips.length) % chips.length;
+      if (j != null) { e.preventDefault(); chips[j].focus(); select(chips[j].dataset.key); }
+    });
+
+    let visible = true, raf = 0;
+    function resize() {
+      const w = canvas.clientWidth, h = canvas.clientHeight;
+      if (!w || !h) return;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h; camera.updateProjectionMatrix();
+      lineMat.resolution.set(w, h);
+    }
+    new ResizeObserver(() => { resize(); if (cur) frame(cur); }).observe(host);
+    function loop() {
+      raf = 0;
+      if (!visible) return;
+      controls.update();
+      const w = canvas.clientWidth, h = canvas.clientHeight, sx = Math.round(w * split);
+      renderer.setScissorTest(true);
+      renderer.setViewport(0, 0, w, h);
+      renderer.setScissor(0, 0, sx, h); renderer.render(sceneL, camera);
+      renderer.setScissor(sx, 0, w - sx, h); renderer.render(sceneR, camera);
+      raf = requestAnimationFrame(loop);
+    }
+    new IntersectionObserver((es) => { visible = es[0].isIntersecting; if (visible && !raf) raf = requestAnimationFrame(loop); }).observe(host);
+    onTheme(() => { Object.values(cache).forEach(colours); });
+    resize();
+    select("three");
+    raf = requestAnimationFrame(loop);
+  })();
+
+  /* ============================ method explainer ============================ */
+  (function explainer() {
+    const cv = document.getElementById("ex-canvas"), ctx = cv.getContext("2d");
+    const hud = document.getElementById("ex-hud"), say = document.getElementById("ex-say");
+    const sayK = document.getElementById("ex-say-k"), sayH = document.getElementById("ex-say-h"), sayP = document.getElementById("ex-say-p");
+    const scrub = document.getElementById("ex-scrub"), playBtn = document.getElementById("ex-play");
+    const playIcon = document.getElementById("ex-play-icon"), insetLabel = document.getElementById("ex-inset-label");
+    const stepsEl = document.getElementById("ex-steps");
+    const END = 12.0, LOOP = 13.5;
+    // at: start in animation time T; dur: seconds on screen at 1x (reading time for the caption)
+    const STAGES = [
+      { at: 0.0, dur: 5.5, short: "Source density", col: "--gold", title: "Where could corners be?",
+        text: "From the scan, a network predicts a probability over 50 cm columns (darker gold is likelier) and over 10 cm bins inside them." },
+      { at: 2.0, dur: 5.0, short: "Samples", col: "--magenta", title: "Draw samples",
+        text: "{N} samples for {G} corners, each at the centre of its 10 cm bin, so none sits on a corner yet." },
+      { at: 3.5, dur: 6.5, short: "Flow t: 0 → ½", col: "--violet", title: "Flow step 1: t = 0 → ½",
+        text: "One pass predicts each sample's corner, existence and class. Samples move halfway, and the surest are kept or dropped." },
+      { at: 6.0, dur: 6.5, short: "Flow t: ½ → 1", col: "--violet", title: "Flow step 2: t = ½ → 1",
+        text: "A second pass finishes the move and decides the rest. Of several samples near one corner, one is kept." },
+      { at: 8.5, dur: 7.0, short: "Graph", col: "--wall", title: "The graph",
+        text: "Edges are scored between kept corners: {K} corners and {E} edges, each corner with a class." },
+    ];
+    const T_END = STAGES.map((s, i) => (i + 1 < STAGES.length ? STAGES[i + 1].at : LOOP));
+    const R0 = []; let RLOOP = 0;
+    STAGES.forEach((s) => { R0.push(RLOOP); RLOOP += s.dur; });
+    const toT = (r) => { let i = STAGES.length - 1; while (i > 0 && r < R0[i]) i--; return STAGES[i].at + clamp((r - R0[i]) / STAGES[i].dur) * (T_END[i] - STAGES[i].at); };
+    const toR = (t) => { const i = stageOf(t); return R0[i] + clamp((t - STAGES[i].at) / (T_END[i] - STAGES[i].at)) * STAGES[i].dur; };
+    STAGES.forEach((s, i) => {
+      const b = document.createElement("button");
+      b.className = "ex-step"; b.setAttribute("role", "tab"); b.setAttribute("aria-selected", "false");
+      b.style.setProperty("--stage-c", `var(${s.col})`);
+      b.innerHTML = `<b>${i + 1}</b>${s.short}<span class="pbar"><i></i></span>`;
+      b.addEventListener("click", () => { setT(s.at + 0.001); userPaused = false; play(true); });
+      stepsEl.appendChild(b);
+    });
+    const stepBtns = Array.from(stepsEl.children), stepFills = stepBtns.map((b) => b.querySelector(".pbar i"));
+    let speed = 1;
+    const speedBtns = Array.from(document.querySelectorAll("#ex-speed button"));
+    speedBtns.forEach((b) => b.addEventListener("click", () => {
+      speed = parseFloat(b.dataset.v);
+      speedBtns.forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+    }));
+
+    let D = null, T = END, R = 0, playing = false, visible = false, last = 0, raf = 0, az = -58, tok = {};
+    let W = 0, H = 0, dpr = 1, view = null, userPaused = false;
+
+    function readTok() {
+      tok = {};
+      ["--ink", "--muted", "--gold", "--magenta", "--violet", "--wall", "--door", "--window", "--stair", "--pt-a", "--pt-b", "--sheet", "--rule", "--plate"].forEach((k) => (tok[k] = css(k)));
+    }
+    readTok();
+    onTheme(() => { readTok(); draw(); });
+
+    function rng(seed) { return () => { seed |= 0; seed = (seed + 0x6d2b79f5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+    const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+
+    function prep(d) {
+      const N = d.src.length, r = rng(11);
+      const order = d.src.map(() => r());
+      const idx = d.p.map((p, i) => [Math.abs(p - 0.5), i]).sort((a, b) => b[0] - a[0]).map((x) => x[1]);
+      const rank = new Array(N); idx.forEach((i, k) => (rank[i] = k));
+      const half = Math.ceil(N / 2);
+      const decideAt = rank.map((k) => (k < half ? 5.0 + 0.9 * (k / half) : 7.5 + 0.9 * ((k - half) / (N - half))));
+      const near = d.ref.map((q) => { let best = 0, bd = Infinity; d.gt.forEach((g, j) => { const v = dist(q, g); if (v < bd) { bd = v; best = j; } }); return best; });
+      const zFloor = Math.min(...d.gt.map((g) => g[2]));
+      // inset corner: the ground-truth corner with the most samples starting within 20 cm
+      let ic = 0, icn = -1;
+      d.gt.forEach((g, j) => {
+        const n = d.src.reduce((s, q) => s + (dist(q, g) < 0.2 ? 1 : 0), 0);
+        const keptHere = d.ref.some((q, i) => d.keep[i] && dist(q, g) < 0.03);
+        if (keptHere && n > icn) { icn = n; ic = j; }
+      });
+      const c0 = d.gt[ic];
+      const insetPts = d.cloud.filter((p) => dist(p, c0) < 0.45);
+      const insetSamples = d.src.map((q, i) => i).filter((i) => dist(d.src[i], c0) < 0.32 || dist(d.ref[i], c0) < 0.32);
+      const pmax = Math.max(...d.cols.map((c) => c[2]));
+      const centre = [0, 1, 2].map((k) => d.gt.reduce((s, g) => s + g[k], 0) / d.gt.length);
+      return { ...d, N, order, decideAt, near, zFloor, c0, insetPts, insetSamples, pmax, centre,
+        keptN: d.keep.reduce((a, b) => a + b, 0) };
+    }
+
+    function basis() {
+      const phi = (az * Math.PI) / 180, th = (24 * Math.PI) / 180;
+      return { R: [-Math.sin(phi), Math.cos(phi), 0], U: [-Math.sin(th) * Math.cos(phi), -Math.sin(th) * Math.sin(phi), Math.cos(th)] };
+    }
+    function plane(p, B) {
+      const x = p[0] - D.centre[0], y = p[1] - D.centre[1], z = p[2] - D.centre[2];
+      return [x * B.R[0] + y * B.R[1] + z * B.R[2], x * B.U[0] + y * B.U[1] + z * B.U[2]];
+    }
+    function layout() {
+      const B = basis();
+      const pts = D.cloud.map((p) => plane(p, B));
+      const us = pts.map((p) => p[0]).sort((a, b) => a - b), vs = pts.map((p) => p[1]).sort((a, b) => a - b);
+      const q = (arr, f) => arr[Math.floor(arr.length * f)];
+      let u0 = q(us, 0.005), u1 = q(us, 0.995), v0 = q(vs, 0.005), v1 = q(vs, 0.995);
+      const extra = D.src.concat(D.ref, D.cols.flatMap(([x, y]) => [[x, y, D.zFloor], [x + 0.5, y, D.zFloor], [x, y + 0.5, D.zFloor], [x + 0.5, y + 0.5, D.zFloor]]));
+      extra.forEach((p) => { const [u, v] = plane(p, B); u0 = Math.min(u0, u); u1 = Math.max(u1, u); v0 = Math.min(v0, v); v1 = Math.max(v1, v); });
+      const narrow = W < 560;
+      const mainW = narrow ? W : W * 0.66, padT = narrow ? 62 : 40, padB = narrow ? 12 : 22;
+      const s = Math.min((mainW - (narrow ? 24 : 64)) / (u1 - u0), (H - padT - padB) / (v1 - v0));
+      const ox = (narrow ? W / 2 : mainW / 2 + 6) - s * (u0 + u1) / 2;
+      const oy = padT + (H - padT - padB) / 2 + s * (v0 + v1) / 2;
+      const sayRight = getComputedStyle(say).position === "absolute";
+      const iR = narrow ? Math.min(W * 0.17, 60) : sayRight ? Math.min(W * 0.135, H * 0.27) : Math.min(W * 0.15, H * 0.36);
+      const ic = narrow ? [W - iR - 10, H - iR - 10] : [W * 0.835, sayRight ? H * 0.635 : H * 0.47];
+      view = { B, s, ox, oy, pts: pts.map((p) => [ox + s * p[0], oy - s * p[1]]), iR, ic, zoom: iR / 0.16,
+        c0p: plane(D.c0, B), insetPts: D.insetPts.map((p) => plane(p, B)) };
+      insetLabel.style.left = `${ic[0] - 80}px`; insetLabel.style.width = "160px";
+      insetLabel.style.top = `${ic[1] + iR + 6}px`;
+      insetLabel.textContent = "close-up, 32 cm across";
+      insetLabel.hidden = narrow;
+    }
+    const scr = (p) => { const q = plane(p, view.B); return [view.ox + view.s * q[0], view.oy - view.s * q[1]]; };
+    const ins = (p) => { const q = plane(p, view.B); return [view.ic[0] + view.zoom * (q[0] - view.c0p[0]), view.ic[1] - view.zoom * (q[1] - view.c0p[1])]; };
+
+    function progress(T) {
+      if (T < 3.5) return 0;
+      if (T < 5.0) return 0.5 * ease((T - 3.5) / 1.5);
+      if (T < 6.0) return 0.5;
+      if (T < 7.5) return 0.5 + 0.5 * ease((T - 6.0) / 1.5);
+      return 1;
+    }
+    const lerp3 = (a, b, s) => [a[0] + (b[0] - a[0]) * s, a[1] + (b[1] - a[1]) * s, a[2] + (b[2] - a[2]) * s];
+    const rgba = (hex, a) => { const c = hexToRgb(hex); return `rgba(${c[0]},${c[1]},${c[2]},${a})`; };
+    const mixHex = (h1, h2, t) => { const c = mix(hexToRgb(h1), hexToRgb(h2), clamp(t)); return `rgb(${c.map(Math.round).join(",")})`; };
+
+    function sampleState(i, T) {
+      const appear = clamp((T - (2.0 + 1.3 * D.order[i])) / 0.25);
+      const dt = T - D.decideAt[i];
+      const decided = dt >= 0;
+      const kept = D.keep[i] === 1;
+      const k = decided ? clamp(dt / 0.35) : 0;
+      return { appear, decided, kept, k };
+    }
+
+    function drawScene(T, toScreen, opts) {
+      const s = progress(T);
+      const inGraph = clamp((T - 8.5) / 1.5);
+      // column density tiles on the floor
+      const colA = clamp(T / 0.4) * clamp((T - 0.6) / 1.0) * (T > 3.5 ? 0.45 : 1);
+      if (colA > 0 && opts.cols) {
+        D.cols.forEach(([x, y, p]) => {
+          const a = colA * (0.12 + 0.78 * Math.sqrt(p / D.pmax));
+          const z = D.zFloor;
+          const c = [[x, y, z], [x + 0.5, y, z], [x + 0.5, y + 0.5, z], [x, y + 0.5, z]].map(toScreen);
+          ctx.beginPath(); ctx.moveTo(c[0][0], c[0][1]); for (let k = 1; k < 4; k++) ctx.lineTo(c[k][0], c[k][1]); ctx.closePath();
+          ctx.fillStyle = rgba(tok["--gold"], a); ctx.fill();
+          ctx.strokeStyle = rgba(tok["--gold"], Math.min(1, a + 0.15)); ctx.lineWidth = 0.8; ctx.stroke();
+        });
+      }
+      // edges
+      if (inGraph > 0) {
+        ctx.lineCap = "round";
+        D.edges.forEach(([i, j]) => {
+          let c = D.cls[i]; if (c === 0 && D.cls[j] !== 0) c = D.cls[j];
+          const a = toScreen(D.ref[i]), b = toScreen(D.ref[j]);
+          const e = ease(inGraph);
+          ctx.strokeStyle = tok[CLASS_TOK[c]] || tok["--wall"]; ctx.lineWidth = opts.lw;
+          ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(a[0] + (b[0] - a[0]) * e, a[1] + (b[1] - a[1]) * e); ctx.stroke();
+        });
+      }
+      // samples
+      const list = opts.only || D.src.map((_, i) => i);
+      const dropped = [], kept = [];
+      list.forEach((i) => { (D.keep[i] ? kept : dropped).push(i); });
+      const drawOne = (i) => {
+        const st = sampleState(i, T);
+        if (st.appear <= 0) return;
+        let alpha = st.appear, r = opts.r, fill = tok["--magenta"];
+        if (st.decided && !st.kept) { alpha *= 1 - st.k; r *= 1 - 0.5 * st.k; }
+        if (st.decided && st.kept) {
+          fill = mixHex(tok["--magenta"], tok["--violet"], st.k);
+          if (inGraph > 0) fill = mixHex(tok["--violet"], tok[CLASS_TOK[D.cls[i]]] || tok["--wall"], inGraph);
+          r *= 1 + 0.25 * st.k;
+        }
+        if (alpha <= 0.01) return;
+        const p = toScreen(lerp3(D.src[i], D.ref[i], s));
+        ctx.globalAlpha = alpha;
+        ctx.beginPath(); ctx.arc(p[0], p[1], r, 0, 2 * Math.PI);
+        ctx.fillStyle = fill; ctx.fill();
+        if (st.decided && st.kept) { ctx.lineWidth = 1; ctx.strokeStyle = tok["--sheet"]; ctx.stroke(); }
+        else if (!st.decided) { ctx.lineWidth = 0.6; ctx.strokeStyle = rgba(tok["--sheet"], 0.8); ctx.stroke(); }
+        ctx.globalAlpha = 1;
+      };
+      dropped.forEach(drawOne); kept.forEach(drawOne);
+    }
+
+    function draw() {
+      if (!D || !view) return;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, W, H);
+      const scanA = clamp(T / 0.5);
+      // scan points
+      const ptA = hexToRgb(tok["--pt-a"]);
+      ctx.fillStyle = `rgba(${ptA[0]},${ptA[1]},${ptA[2]},${0.34 * scanA})`;
+      for (const p of view.pts) ctx.fillRect(p[0] - 0.55, p[1] - 0.55, 1.1, 1.1);
+      drawScene(T, scr, { cols: true, r: W < 560 ? 2.0 : 2.6, lw: 1.6 });
+
+      // inset
+      const showInset = T >= 2.0;
+      const [cx, cy] = view.ic, R = view.iR;
+      const cs = scr(D.c0), mark = Math.max(7, 0.16 * view.s);
+      ctx.save();
+      ctx.globalAlpha = showInset ? 1 : 0.35;
+      ctx.strokeStyle = tok["--muted"]; ctx.lineWidth = 1; ctx.setLineDash([3, 3]);
+      ctx.beginPath(); ctx.arc(cs[0], cs[1], mark, 0, 2 * Math.PI); ctx.stroke();
+      const ang = Math.atan2(cy - cs[1], cx - cs[0]);
+      ctx.beginPath(); ctx.moveTo(cs[0] + mark * Math.cos(ang), cs[1] + mark * Math.sin(ang));
+      ctx.lineTo(cx - R * Math.cos(ang), cy - R * Math.sin(ang)); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.beginPath(); ctx.arc(cx, cy, R, 0, 2 * Math.PI); ctx.fillStyle = tok["--sheet"]; ctx.fill();
+      ctx.clip();
+      // faint 10 cm grid in the close-up (bin size)
+      ctx.strokeStyle = rgba(tok["--muted"], 0.18); ctx.lineWidth = 1;
+      const step = 0.1 * view.zoom;
+      for (let gx = cx - Math.ceil(R / step) * step; gx < cx + R; gx += step) { ctx.beginPath(); ctx.moveTo(gx, cy - R); ctx.lineTo(gx, cy + R); ctx.stroke(); }
+      for (let gy = cy - Math.ceil(R / step) * step; gy < cy + R; gy += step) { ctx.beginPath(); ctx.moveTo(cx - R, gy); ctx.lineTo(cx + R, gy); ctx.stroke(); }
+      ctx.fillStyle = rgba(tok["--pt-a"], 0.3 * scanA);
+      view.insetPts.forEach((q) => { const x = cx + view.zoom * (q[0] - view.c0p[0]), y = cy - view.zoom * (q[1] - view.c0p[1]); ctx.fillRect(x - 1, y - 1, 2, 2); });
+      if (showInset) {
+        drawScene(T, ins, { cols: false, r: 4.2, lw: 2.2, only: D.insetSamples });
+        const g = ins(D.c0);
+        ctx.strokeStyle = tok["--ink"]; ctx.lineWidth = 1.6;
+        ctx.beginPath(); ctx.arc(g[0], g[1], 7.5, 0, 2 * Math.PI); ctx.stroke();
+      }
+      ctx.restore();
+      ctx.beginPath(); ctx.arc(cx, cy, R, 0, 2 * Math.PI); ctx.strokeStyle = tok["--ink"]; ctx.lineWidth = 1.2; ctx.stroke();
+      // scale bar: 5 cm
+      const bar = 0.05 * view.zoom, bx = cx - bar / 2, by = cy + R - 16;
+      ctx.strokeStyle = tok["--ink"]; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(bx, by - 3); ctx.lineTo(bx, by); ctx.lineTo(bx + bar, by); ctx.lineTo(bx + bar, by - 3); ctx.stroke();
+      ctx.font = "11px " + css("--f-mono"); ctx.fillStyle = tok["--ink"]; ctx.textAlign = "center";
+      ctx.fillText("5 cm", cx, by - 6);
+      hudUpdate();
+    }
+
+    function stageOf(T) { let k = 0; STAGES.forEach((s, i) => { if (T >= s.at) k = i; }); return k; }
+    let lastStage = -1;
+    function hudUpdate() {
+      const s = progress(T);
+      let keptN = 0, dropN = 0, open = 0, shown = 0;
+      const errs = [];
+      for (let i = 0; i < D.N; i++) {
+        const st = sampleState(i, T);
+        if (st.appear > 0) shown++;
+        if (st.appear <= 0) continue;
+        if (!st.decided) open++; else if (st.kept) keptN++; else dropN++;
+        if (D.keep[i]) errs.push(dist(lerp3(D.src[i], D.ref[i], s), D.gt[D.near[i]]));
+      }
+      errs.sort((a, b) => a - b);
+      const med = errs.length ? errs[Math.floor(errs.length / 2)] * 100 : null;
+      const tval = T < 3.5 ? "t = 0" : `t = ${s.toFixed(2)}`;
+      hud.innerHTML =
+        `<span class="tval">${tval}</span>` +
+        (T >= 2.0 ? `<span class="key"><i class="dot" style="background:${tok["--magenta"]}"></i>${open} undecided</span>` +
+          `<span class="key"><i class="dot" style="background:${tok["--violet"]}"></i>${keptN} kept · ${dropN} dropped</span>` +
+          `<span>kept → corner: ${med == null ? "–" : med.toFixed(1) + " cm"} (median)</span>`
+          : `<span>${shown ? "" : D.cols.length + " columns with mass"}</span>`);
+      const k = stageOf(T);
+      stepFills.forEach((f, i) => { f.style.width = `${100 * clamp((T - STAGES[i].at) / (T_END[i] - STAGES[i].at))}%`; });
+      if (k !== lastStage) {
+        lastStage = k;
+        stepBtns.forEach((b, i) => b.setAttribute("aria-selected", String(i === k)));
+        const st = STAGES[k];
+        say.style.setProperty("--stage-c", `var(${st.col})`);
+        sayK.textContent = `Step ${k + 1} of ${STAGES.length}`;
+        sayH.textContent = st.title;
+        sayP.textContent = st.text.replace("{N}", D.N).replace("{G}", D.gt.length).replace("{K}", D.keptN).replace("{E}", D.edges.length);
+        say.classList.remove("in"); void say.offsetWidth; say.classList.add("in");
+      }
+      scrub.value = Math.round(T * 1000);
+    }
+
+    function setT(v) { T = clamp(v, 0, LOOP); R = toR(T); draw(); }
+    function setIcon() {
+      playIcon.setAttribute("d", playing ? "M3 1.5h3v11H3zM8 1.5h3v11H8z" : "M3 1.5v11l9-5.5z");
+      playBtn.setAttribute("aria-label", playing ? "Pause" : "Play");
+    }
+    function play(on) {
+      playing = on; setIcon();
+      if (on) { if (T >= LOOP - 0.01) { T = 0; R = 0; } last = performance.now(); if (!raf) raf = requestAnimationFrame(tick); }
+    }
+    function tick(now) {
+      raf = 0;
+      if (!playing || !visible) return;
+      const dt = Math.min(0.1, (now - last) / 1000); last = now;
+      R += dt * speed;
+      if (R >= RLOOP) R = 0;
+      T = toT(R);
+      draw();
+      raf = requestAnimationFrame(tick);
+    }
+    playBtn.addEventListener("click", () => { userPaused = playing; play(!playing); });
+    scrub.addEventListener("input", () => { play(false); userPaused = true; setT(scrub.value / 1000); });
+
+    // drag sideways to turn the scene
+    let drag = null;
+    cv.addEventListener("pointerdown", (e) => { drag = { x: e.clientX, az }; cv.setPointerCapture(e.pointerId); });
+    cv.addEventListener("pointermove", (e) => { if (!drag) return; az = drag.az + (e.clientX - drag.x) * 0.35; layout(); draw(); });
+    const endDrag = () => { drag = null; };
+    cv.addEventListener("pointerup", endDrag); cv.addEventListener("pointercancel", endDrag);
+
+    function resize() {
+      const r = cv.getBoundingClientRect();
+      W = r.width; H = r.height; dpr = Math.min(window.devicePixelRatio || 1, 2);
+      cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+      if (D) { layout(); draw(); }
+    }
+    new ResizeObserver(resize).observe(cv);
+    new IntersectionObserver((es) => {
+      visible = es[0].isIntersecting;
+      if (visible && !userPaused && !REDUCE && D) {
+        if (!playing) { if (T >= END) { T = 0; R = 0; } play(true); }
+        else if (!raf) { last = performance.now(); raf = requestAnimationFrame(tick); }
+      }
+    }, { threshold: 0.35 }).observe(cv);
+
+    fetch("assets/method_scene.json").then((r) => r.json()).then((d) => {
+      D = prep(d); resize();
+      if (visible && !REDUCE && !userPaused) { T = 0; R = 0; play(true); } else { setT(END); }
+    }).catch(() => { sayP.textContent = "The animation data did not load. The architecture figure below shows the same pipeline."; });
+    setIcon();
+  })();
+
+
+  /* ============================ overview bar plot ============================ */
+  (function glance() {
+    const SLOTS = [
+      { key: "hf", name: "HouseFlow", tok: "--violet" }, { key: "ss", name: "SceneScript*", tok: "--ss" },
+      { key: "sl", name: "SpatialLM*", tok: "--sl" }, { key: "rf", name: "RoomFormer*", tok: "--rf" },
+    ];
+    // paper Table 1 (ASE / HouseScan-100K, 1 cm), Table 3 (HouseLayout3D, 10 cm), run-time figure (largest size group)
+    const PANELS = [
+      { title: "ASE", sub: "HSS @ 1 cm ↑", max: 100, ticks: [0, 50, 100], v: { rf: 4.2, sl: 10.9, ss: 33.7, hf: 57.9 } },
+      { title: "HouseScan-100K", sub: "HSS @ 1 cm ↑", max: 100, ticks: [0, 50, 100], v: { rf: null, sl: 5.0, ss: 34.8, hf: 72.5 } },
+      { title: "HouseLayout3D, real, zero-shot", sub: "HSS @ 10 cm ↑", max: 100, ticks: [0, 50, 100], v: { rf: null, sl: 10.5, ss: 8.6, hf: 34.8 } },
+      { title: "Run time, large buildings", sub: "seconds ↓", max: 80, ticks: [0, 40, 80], v: { rf: null, sl: 74.67, ss: 27.42, hf: 0.573 }, unit: " s" },
+    ];
+    document.getElementById("glance-legend").innerHTML = SLOTS.map((s) =>
+      `<span><svg viewBox="0 0 26 10" aria-hidden="true"><rect x="7" y="0" width="12" height="10" rx="2" fill="var(${s.tok})"/></svg>${s.name}</span>`).join("");
+    const VW = 220, VH = 168, m = { l: 26, r: 4, t: 16, b: 8 };
+    const bw = (VW - m.l - m.r) / SLOTS.length;
+    document.getElementById("glance").innerHTML = PANELS.map((p) => {
+      const y = (v) => m.t + (1 - v / p.max) * (VH - m.t - m.b);
+      let g = `<svg viewBox="0 0 ${VW} ${VH}" role="img" aria-label="${p.title}, ${p.sub}: ` +
+        SLOTS.map((s) => `${s.name} ${p.v[s.key] == null ? "n/a" : p.v[s.key]}`).join(", ") + `">`;
+      p.ticks.forEach((t) => {
+        g += `<line x1="${m.l}" x2="${VW - m.r}" y1="${y(t)}" y2="${y(t)}" stroke="var(--rule)" stroke-width="1"/>`;
+        g += `<text x="${m.l - 5}" y="${y(t) + 3.5}" text-anchor="end" fill="var(--muted)">${t}</text>`;
+      });
+      SLOTS.forEach((s, i) => {
+        const v = p.v[s.key], cx = m.l + bw * (i + 0.5), w = bw * 0.62;
+        if (v == null) { g += `<text x="${cx}" y="${y(0) - 4}" text-anchor="middle" fill="var(--muted)">n/a</text>`; return; }
+        const top = y(v), h = Math.max(1.5, y(0) - top), r = Math.min(4, h / 2);
+        g += `<path d="M${cx - w / 2},${y(0)} V${top + r} Q${cx - w / 2},${top} ${cx - w / 2 + r},${top} H${cx + w / 2 - r} Q${cx + w / 2},${top} ${cx + w / 2},${top + r} V${y(0)} Z" fill="var(${s.tok})"><title>${s.name}: ${v}${p.unit || ""}</title></path>`;
+        g += `<text x="${cx}" y="${Math.min(top, y(0) - 1.5) - 4}" text-anchor="middle" fill="var(--ink-2)">${v < 1 ? v.toFixed(2) : v.toFixed(1)}</text>`;
+      });
+      return `<div class="gpanel"><span class="gt">${p.title}</span><span class="gs">${p.sub}</span>${g}</svg></div>`;
+    }).join("");
+  })();
+
+  /* ============================ results table ============================ */
+  (function results() {
+    const M = (name, disc, fam, star) => ({ name, disc, fam, star });
+    const METHODS = {
+      rf256: M("RoomFormer", "256 px", "--rf"), rf512: M("RoomFormer*", "512 px", "--rf", true),
+      sl25: M("SpatialLM", "2.5 cm", "--sl"), sl1: M("SpatialLM*", "1 cm", "--sl", true),
+      ss5: M("SceneScript", "5 cm", "--ss"), ss1: M("SceneScript*", "1 cm", "--ss", true),
+      ours: M("HouseFlow (ours)", "continuous", "--violet"),
+    };
+    // [HSS@1, HSS@2, F1@1, F1@2, IoU@1, IoU@2, time s]  (paper Table 1)
+    const SYN = {
+      ase: {
+        rf256: [2.8, 10.7, 1.8, 7.8, 5.1, 12.6, 0.015], rf512: [4.2, 13.9, 2.8, 11.3, 6.4, 14.7, 0.016],
+        sl25: [7.4, 28.8, 6.8, 32.7, 10.1, 26.1, 3.70], sl1: [10.9, 32.1, 10.5, 36.9, 12.9, 28.7, 3.92],
+        ss5: [2.1, 14.3, 2.1, 15.3, 4.1, 15.3, 0.258], ss1: [33.7, 51.6, 40.7, 61.2, 29.0, 44.5, 0.313],
+        ours: [57.9, 75.7, 69.2, 86.7, 49.5, 66.9, 0.107],
+      },
+      hs: {
+        rf256: null, rf512: null,
+        sl25: [3.3, 15.5, 2.5, 15.6, 5.9, 17.0, 34.8], sl1: [5.0, 19.1, 4.1, 20.0, 8.0, 20.1, 38.9],
+        ss5: [2.2, 13.4, 1.7, 12.8, 3.8, 14.9, 2.50], ss1: [34.8, 51.3, 46.1, 67.6, 28.4, 41.9, 12.1],
+        ours: [72.5, 82.5, 86.7, 91.9, 62.3, 75.0, 0.490],
+      },
+    };
+    // HouseLayout3D HSS at 10 / 20 / 25 / 50 cm (paper Table 3)
+    const HL = { ss1: [8.6, 16.9, 19.6, 30.5], ss5: [9.8, 20.3, 23.4, 34.2], sl1: [10.5, 20.9, 24.7, 38.8], sl25: [10.4, 22.9, 27.3, 41.5], ours: [34.8, 47.5, 51.0, 61.7] };
+    const NOTES = {
+      ase: "ASE: 100k single-storey synthetic scenes; the public training set is split 80k / 10k / 10k because test scenes are not released. Time is the mean per scene.",
+      hs: "HouseScan-100K test set, 5,460 buildings. RoomFormer works on a top-down density map and cannot represent several storeys. Time is the mean per building.",
+      hl: "16 real multi-storey buildings, all models trained on HouseScan-100K only, no fine-tuning. Scores at 1 and 2 cm are left out: scan and annotation noise exceed them.",
+    };
+    const table = document.getElementById("restable"), note = document.getElementById("res-note");
+    const tabs = Array.from(document.querySelectorAll("#res-tabs button")), thrEl = document.getElementById("res-thr");
+    let ds = "hs", thr = 0;
+    const thrs = () => (ds === "hl" ? ["@10 cm", "@20 cm", "@25 cm", "@50 cm"] : ["@1 cm", "@2 cm"]);
+
+    function renderThr() {
+      thrEl.innerHTML = "";
+      thrs().forEach((label, i) => {
+        const b = document.createElement("button");
+        b.textContent = label; b.setAttribute("aria-pressed", String(i === thr));
+        b.addEventListener("click", () => { thr = i; renderThr(); render(); });
+        thrEl.appendChild(b);
+      });
+    }
+    function render() {
+      const rows = [];
+      if (ds === "hl") {
+        table.classList.add("hl");
+        Object.keys(HL).forEach((k) => rows.push({ k, hss: HL[k][thr], other: [] }));
+      } else {
+        table.classList.remove("hl");
+        Object.keys(SYN[ds]).forEach((k) => {
+          const v = SYN[ds][k];
+          if (v) rows.push({ k, hss: v[thr], f1: v[2 + thr], iou: v[4 + thr], time: v[6] });
+        });
+      }
+      const ours = rows.filter((r) => r.k === "ours"), rest = rows.filter((r) => r.k !== "ours");
+      rest.sort((a, b) => (a.na ? 1 : b.na ? -1 : b.hss - a.hss));
+      const t = thrs()[thr];
+      const others = [0, 1, 2, 3].filter((i) => i !== thr);
+      let html = `<div class="rrow head" role="row"><span role="columnheader">Method</span><span role="columnheader">HSS ${t} ↑</span>` +
+        (ds === "hl" ? others.map((i, j) => `<span class="num${j === 2 ? " t" : ""}" role="columnheader">${thrs()[i].replace(" ", "")}</span>`).join("")
+          : `<span class="num" role="columnheader">F1 ↑</span><span class="num" role="columnheader">IoU ↑</span><span class="num t" role="columnheader">Time ↓</span>`) + `</div>`;
+      [...ours, ...rest].forEach((r) => {
+        const m = METHODS[r.k];
+        const name = `<span class="mname" role="cell">${m.name}<small>${m.disc}</small></span>`;
+        if (r.na) {
+          html += `<div class="rrow na" role="row">${name}<span class="hbar" role="cell"><span class="bar-track"></span><span class="bar-val">–</span></span><span class="num" role="cell">–</span><span class="num" role="cell">–</span><span class="num t" role="cell">–</span></div>`;
+          return;
+        }
+        const bar = `<span class="hbar" role="cell"><span class="bar-track"><span class="bar-fill" style="width:${r.hss}%;background:var(${m.fam})"></span></span><span class="bar-val">${fmt(r.hss)}</span></span>`;
+        const nums = ds === "hl" ? others.map((i, j) => `<span class="num${j === 2 ? " t" : ""}" role="cell">${fmt(HL[r.k][i])}</span>`).join("")
+          : `<span class="num" role="cell">${fmt(r.f1)}</span><span class="num" role="cell">${fmt(r.iou)}</span><span class="num t" role="cell">${r.time < 1 ? r.time.toFixed(3) : r.time.toFixed(r.time < 10 ? 2 : 1)} s</span>`;
+        html += `<div class="rrow${r.k === "ours" ? " ours" : ""}" role="row">${name}${bar}${nums}</div>`;
+      });
+      table.innerHTML = html;
+      note.textContent = NOTES[ds] + (ds === "hl" ? "" : " F1: corner F1; IoU: edge IoU, at the same tolerance. * = finer-token variant.");
+    }
+    tabs.forEach((b) => b.addEventListener("click", () => {
+      const was = ds; ds = b.dataset.ds;
+      tabs.forEach((x) => x.setAttribute("aria-selected", String(x === b)));
+      if ((was === "hl") !== (ds === "hl")) thr = 0;
+      renderThr(); render();
+    }));
+    renderThr(); render();
+  })();
+
+  /* ============================ run-time chart ============================ */
+  (function runtime() {
+    const X = [164, 363, 557, 720, 897, 1042];
+    const S = [
+      { key: "ours", name: "HouseFlow (ours)", tok: "--violet", dash: "", y: [0.3984, 0.4381, 0.4826, 0.516, 0.5418, 0.573], bold: true },
+      { key: "ss5", name: "SceneScript (5 cm)", tok: "--ss", dash: "5 4", y: [0.5932, 1.096, 1.782, 2.581, 3.622, 4.825] },
+      { key: "ss1", name: "SceneScript (1 cm)", tok: "--ss", dash: "", y: [0.6561, 2.038, 5.488, 10.26, 18.34, 27.42] },
+      { key: "sl25", name: "SpatialLM (2.5 cm)", tok: "--sl", dash: "5 4", y: [9.429, 17.03, 28.7, 40.91, 51.23, 61.58] },
+      { key: "sl1", name: "SpatialLM (1 cm)", tok: "--sl", dash: "", y: [9.893, 18.14, 30.28, 42.08, 54.44, 74.67] },
+    ];
+    const host = document.getElementById("rt-chart"), legend = document.getElementById("rt-legend");
+    legend.innerHTML = S.map((s) => `<span><svg viewBox="0 0 26 10" aria-hidden="true"><line x1="1" y1="5" x2="25" y2="5" stroke="var(${s.tok})" stroke-width="${s.bold ? 3 : 2}" stroke-dasharray="${s.dash}" stroke-linecap="round"/></svg>${s.name}</span>`).join("");
+    const VW = 720, VH = 330, m = { l: 52, r: 18, t: 14, b: 40 };
+    const xs = (x) => m.l + ((x - 100) / (1100 - 100)) * (VW - m.l - m.r);
+    const ly0 = Math.log10(0.25), ly1 = Math.log10(100);
+    const ys = (y) => m.t + (1 - (Math.log10(y) - ly0) / (ly1 - ly0)) * (VH - m.t - m.b);
+    let svg = `<svg viewBox="0 0 ${VW} ${VH}" role="img" aria-label="Median run time per building against building size. HouseFlow stays between 0.40 and 0.57 seconds; SceneScript 1 cm grows to 27 seconds and SpatialLM 1 cm to 75 seconds.">`;
+    [0.3, 1, 3, 10, 30, 100].forEach((v) => {
+      svg += `<line x1="${m.l}" x2="${VW - m.r}" y1="${ys(v)}" y2="${ys(v)}" stroke="var(--rule)" stroke-width="1"/>`;
+      svg += `<text x="${m.l - 8}" y="${ys(v) + 4}" text-anchor="end">${v} s</text>`;
+    });
+    [200, 400, 600, 800, 1000].forEach((v) => svg += `<text x="${xs(v)}" y="${VH - m.b + 18}" text-anchor="middle">${v}</text>`);
+    svg += `<text x="${(m.l + VW - m.r) / 2}" y="${VH - 6}" text-anchor="middle">ground-truth corners per building</text>`;
+    svg += `<line id="rt-cross" x1="0" x2="0" y1="${m.t}" y2="${VH - m.b}" stroke="var(--muted)" stroke-width="1" stroke-dasharray="3 3" visibility="hidden"/>`;
+    S.slice().reverse().forEach((s) => {
+      const d = s.y.map((y, i) => `${i ? "L" : "M"}${xs(X[i]).toFixed(1)},${ys(y).toFixed(1)}`).join("");
+      svg += `<path d="${d}" fill="none" stroke="var(${s.tok})" stroke-width="${s.bold ? 3 : 2}" stroke-dasharray="${s.dash}" stroke-linecap="round" stroke-linejoin="round"/>`;
+      s.y.forEach((y, i) => svg += `<circle cx="${xs(X[i])}" cy="${ys(y)}" r="${s.bold ? 4.5 : 3.5}" fill="var(${s.tok})" stroke="var(--sheet)" stroke-width="2"/>`);
+    });
+    svg += `<text x="${xs(1042) - 8}" y="${ys(0.573) + 20}" text-anchor="end" style="fill: var(--violet); font-weight: 500">HouseFlow 0.57 s</text>`;
+    X.forEach((x, i) => {
+      const x0 = i ? (xs(X[i - 1]) + xs(x)) / 2 : m.l, x1 = i < X.length - 1 ? (xs(x) + xs(X[i + 1])) / 2 : VW - m.r;
+      svg += `<rect data-i="${i}" x="${x0}" y="${m.t}" width="${x1 - x0}" height="${VH - m.t - m.b}" fill="transparent" style="cursor: crosshair"/>`;
+    });
+    svg += `</svg>`;
+    host.innerHTML = svg + `<div class="tip" id="rt-tip" hidden></div>`;
+    const tip = document.getElementById("rt-tip"), cross = host.querySelector("#rt-cross");
+    const showAt = (i) => {
+      tip.innerHTML = `<div class="tt">median of buildings with ~${X[i].toLocaleString("en-US")} corners</div>` +
+        S.map((s) => `<div class="tr"><i style="background: var(${s.tok})"></i><span>${s.name}</span><b>${s.y[i] < 1 ? s.y[i].toFixed(2) : s.y[i].toFixed(1)} s</b></div>`).join("");
+      tip.hidden = false;
+      const svgEl = host.querySelector("svg"), r = svgEl.getBoundingClientRect(), hr = host.getBoundingClientRect();
+      const px = (xs(X[i]) / VW) * r.width + (r.left - hr.left);
+      cross.setAttribute("x1", xs(X[i])); cross.setAttribute("x2", xs(X[i])); cross.setAttribute("visibility", "visible");
+      const tw = tip.offsetWidth;
+      tip.style.left = `${Math.max(8, Math.min(hr.width - tw - 8, px < hr.width / 2 ? px + 14 : px - tw - 14))}px`;
+      tip.style.top = `14px`;
+    };
+    host.querySelectorAll("rect[data-i]").forEach((rc) => {
+      rc.addEventListener("pointerenter", () => showAt(+rc.dataset.i));
+      rc.addEventListener("pointerdown", () => showAt(+rc.dataset.i));
+    });
+    host.addEventListener("pointerleave", () => { tip.hidden = true; cross.setAttribute("visibility", "hidden"); });
+  })();
+
+  /* ============================ comparison sliders ============================ */
+  function compare(el) {
+    const set = (v) => { v = clamp(v, 0, 100); el.style.setProperty("--pos", v + "%"); el.setAttribute("aria-valuenow", Math.round(v)); };
+    let down = false;
+    const at = (e) => { const r = el.getBoundingClientRect(); set(((e.clientX - r.left) / r.width) * 100); };
+    el.addEventListener("pointerdown", (e) => { down = true; el.setPointerCapture(e.pointerId); at(e); });
+    el.addEventListener("pointermove", (e) => { if (down) at(e); });
+    el.addEventListener("pointerup", () => (down = false)); el.addEventListener("pointercancel", () => (down = false));
+    el.addEventListener("keydown", (e) => {
+      const v = parseFloat(el.getAttribute("aria-valuenow"));
+      if (e.key === "ArrowLeft") { set(v - (e.shiftKey ? 10 : 3)); e.preventDefault(); }
+      if (e.key === "ArrowRight") { set(v + (e.shiftKey ? 10 : 3)); e.preventDefault(); }
+    });
+    set(50);
+  }
+  (function qualitative() {
+    const el = document.getElementById("q-compare");
+    compare(el);
+    const right = document.getElementById("q-right"), left = document.getElementById("q-left-img"), tag = document.getElementById("q-left-tag");
+    const sBtns = Array.from(document.querySelectorAll("#q-scene .chip")), mBtns = Array.from(document.querySelectorAll("#q-left .chip"));
+    let sc = "hs100k_b", m = "scenescript";
+    const SIZE = { hs100k_a: [777, 591], hs100k_b: [777, 759], ase_a: [777, 401], ase_b: [777, 357] };
+    const update = () => {
+      right.width = SIZE[sc][0]; right.height = SIZE[sc][1];
+      right.src = `assets/img/qual_${sc}_ours.webp`;
+      left.src = `assets/img/qual_${sc}_${m}.webp`;
+      tag.textContent = mBtns.find((b) => b.dataset.m === m).textContent;
+    };
+    sBtns.forEach((b) => b.addEventListener("click", () => { sc = b.dataset.s; sBtns.forEach((x) => x.setAttribute("aria-pressed", String(x === b))); update(); }));
+    mBtns.forEach((b) => b.addEventListener("click", () => { m = b.dataset.m; mBtns.forEach((x) => x.setAttribute("aria-pressed", String(x === b))); update(); }));
+    update();
+  })();
+  (function realScans() {
+    const el = document.getElementById("hl-compare");
+    compare(el);
+    const IDS = ["r47D5H71a5s_h0", "stairs_5LpN3gDmAk7_0a", "JmbYfDe2QKZ_roof_v1_0", "JmbYfDe2QKZ_h0", "YFuZgdQ5vWj_h1"];
+    const thumbs = document.getElementById("hl-thumbs"), right = document.getElementById("hl-right"), left = document.getElementById("hl-left");
+    IDS.forEach((id, i) => {
+      const b = document.createElement("button");
+      b.className = "thumb"; b.setAttribute("aria-pressed", String(i === 0)); b.setAttribute("aria-label", `Real scan ${i + 1}`);
+      b.innerHTML = `<img src="assets/img/hl3d_${id}_ours.webp" alt="" loading="lazy">`;
+      b.addEventListener("click", () => {
+        right.src = `assets/img/hl3d_${id}_ours.webp`; left.src = `assets/img/hl3d_${id}_scan.webp`;
+        Array.from(thumbs.children).forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+      });
+      thumbs.appendChild(b);
+    });
+  })();
+
+})();
+</script>
+</body>
+</html>
