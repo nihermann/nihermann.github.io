@@ -450,6 +450,7 @@
         <section class="py-2">
           <h2>News</h2>
           <ul class="mb-0">
+            <li><strong>Nov 2026</strong>: I became a 🏆 <a target="_blank" href="https://www.ecwo.eu/news/landesblasorchester-baden-wurttemberg-wins-ecwo-2026">European Champion</a> with the <a target="_blank" href="https://landesblasorchester.de">Landesblasorchester (LBO)</a>, winning ECWO 2026 (<a target="_blank" href="https://www.ardmediathek.de/video/swr-aktuell-baden-wuerttemberg/sendung-18-00-uhr-vom-22-11-2026/swr-bw/Y3JpZDovL3N3ci5kZS9hZXgvbzIzNjY2MzU?startTime=651.03&endTime=896.96">TV report</a>).</li>
             <li><strong>Jul 2026</strong>: Our Fast Forward for <a target="_blank" href="https://arcanous98.github.io/projectPages/gaborVolumes.html">Gabor Fields</a> was voted among the 🏆 <a target="_blank" href="https://s2026.siggraph.org/program/technical-papers/">TOP 10 at SIGGRAPH'26</a>.</li>
             <li><strong>Jul 2026</strong>: I attended the <a target="_blank" href="https://icvss.dmi.unict.it/icvss2026/">ICVSS 2026</a> Summer School in Sicily.</li>
             <li><strong>Mar 2026</strong>: I will co-organize the 7<sup>th</sup> iteration of the <a href="https://opensun3d.github.io/">Open-Vocabulary 3D Scene Understanding Workshop</a> at <a href="https://eccv.ecva.net/">ECCV'26</a>.</li>
@@ -738,12 +739,59 @@
         link.click();
       }
 
-      async function downloadSVG() {
+      function createFilledQrSvg(value) {
+        const qr = QRCode.create(value);
+        const moduleCount = qr.modules.size;
+        const margin = 4;
+        const svgSize = moduleCount + (margin * 2);
+        const blackRuns = [];
+
+        // Build each continuous row of black modules as a closed, filled shape.
+        // Unlike the library's stroked-line SVG, this geometry scales cleanly in
+        // Illustrator even when "Scale Strokes & Effects" is disabled.
+        for (let row = 0; row < moduleCount; row += 1) {
+          let column = 0;
+
+          while (column < moduleCount) {
+            while (column < moduleCount && !qr.modules.get(row, column)) {
+              column += 1;
+            }
+
+            const runStart = column;
+
+            while (column < moduleCount && qr.modules.get(row, column)) {
+              column += 1;
+            }
+
+            if (runStart < column) {
+              const x = margin + runStart;
+              const y = margin + row;
+              const width = column - runStart;
+              blackRuns.push(`M${x} ${y}h${width}v1h-${width}z`);
+            }
+          }
+        }
+
+        return [
+          '<svg xmlns="http://www.w3.org/2000/svg"',
+          ` viewBox="0 0 ${svgSize} ${svgSize}"`,
+          ' shape-rendering="crispEdges">',
+          `<path fill="#fff" d="M0 0h${svgSize}v${svgSize}H0z"/>`,
+          `<path fill="#000" d="${blackRuns.join('')}"/>`,
+          '</svg>'
+        ].join('');
+      }
+
+      function downloadSVG() {
         const link = document.createElement('a');
-        const qr = await QRCode.toString(qr_url.value, { type: 'svg' });
-        link.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(qr);
+        const qr = createFilledQrSvg(qr_url.value);
+        const svgBlob = new Blob([qr], { type: 'image/svg+xml;charset=utf-8' });
+        const svgUrl = URL.createObjectURL(svgBlob);
+
+        link.href = svgUrl;
         link.download = `${qr_url.value.replace(/https?:\/\//, '').replace(/\//g, '_')}.svg`;
         link.click();
+        window.setTimeout(() => URL.revokeObjectURL(svgUrl), 1000);
       }
 
       puzzle_stop();
