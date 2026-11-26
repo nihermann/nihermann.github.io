@@ -109,6 +109,18 @@ h3 { font-size: 19px; font-weight: 650; font-variation-settings: "wdth" 106; }
 .teaser img { display: block; width: 100%; height: auto; }
 .teaser figcaption { font-size: 15.5px; color: var(--ink-2); max-width: 88ch; }
 .teaser figcaption b { color: var(--ink); }
+/* ---------- video ---------- */
+#video { scroll-margin-top: 12px; }
+.film { margin: 0; display: grid; gap: 12px; }
+.film video {
+  display: block; width: 100%; max-width: 100%; height: auto; aspect-ratio: 16 / 9; background: var(--sheet);
+  border: 1px solid var(--rule); border-radius: var(--radius);
+}
+.film-bar { display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center; justify-content: space-between; }
+.chapters { list-style: none; margin: 0; padding: 0; min-width: 0; }
+.chapters .t { font-family: var(--f-mono); font-size: 11.5px; color: var(--muted); margin-right: 7px; font-variant-numeric: tabular-nums; }
+.chapters .chip[aria-current="true"] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+.chapters .chip[aria-current="true"] .t { color: var(--pt-b); }
 .cdot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin: 0 4px 1px 2px; vertical-align: middle; }
 
 /* ---------- hero viewer ---------- */
@@ -359,6 +371,9 @@ footer .wrap { border-top: 1px solid var(--rule); padding-top: 18px; display: gr
     <h1 class="title">House<span class="flow">Flow</span></h1>
     <p class="subtitle">Reconstructing Building Interior Layouts as 3D Graphs with Multimodal Flow Matching</p>
     <nav class="links" aria-label="Paper resources">
+      <a class="btn" href="#video">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><rect x="1.5" y="3" width="13" height="10" rx="1.5"/><path d="M6.5 5.8v4.4L10.3 8z" fill="currentColor"/></svg>
+        Video</a>
       <span class="btn" aria-disabled="true" title="Coming soon">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M4 1.5h5.5L13 5v9.5H4z"/><path d="M9.5 1.5V5H13"/><path d="M6 8.5h5M6 11h5"/></svg>
         Paper <span class="soon">soon</span></span>
@@ -385,6 +400,51 @@ footer .wrap { border-top: 1px solid var(--rule); padding-top: 18px; display: gr
       </figure>
     </div>
   </section>
+
+  <!-- ======================= video ======================= -->
+  <section id="video" aria-labelledby="video-h">
+    <div class="wrap">
+      <div class="sec-head"><h2 id="video-h">Video</h2><span class="dim"></span></div>
+      <figure class="film">
+        <video id="film" controls playsinline preload="none" poster="assets/video/poster.webp" width="1920" height="1080" aria-label="HouseFlow video with narration, 3 minutes 37 seconds">
+          <source src="assets/video/houseflow.mp4" type="video/mp4">
+          <a href="assets/video/houseflow.mp4">Watch the HouseFlow video (MP4, 3:37)</a>
+        </video>
+        <figcaption class="film-bar">
+          <ul class="chips chapters" id="film-chapters" aria-label="Chapters">
+            <li><button class="chip" data-t="5"><span class="t">0:05</span>Task</button></li>
+            <li><button class="chip" data-t="18"><span class="t">0:18</span>Autoregressive methods</button></li>
+            <li><button class="chip" data-t="51"><span class="t">0:51</span>Flow from noise</button></li>
+            <li><button class="chip" data-t="73"><span class="t">1:13</span>Learned source</button></li>
+            <li><button class="chip" data-t="113"><span class="t">1:53</span>ASE and HouseScan-100K</button></li>
+            <li><button class="chip" data-t="137"><span class="t">2:17</span>Results</button></li>
+            <li><button class="chip" data-t="151"><span class="t">2:31</span>Comparison</button></li>
+            <li><button class="chip" data-t="181"><span class="t">3:01</span>Speed</button></li>
+            <li><button class="chip" data-t="196"><span class="t">3:16</span>Real scans</button></li>
+          </ul>
+          <span class="note">3:37, with narration</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+  <script>
+  (() => {
+    const v = document.getElementById("film");
+    const chips = [...document.querySelectorAll("#film-chapters .chip")];
+    const starts = chips.map((c) => +c.dataset.t);
+    chips.forEach((c) => c.addEventListener("click", () => {
+      const t = +c.dataset.t;
+      if (v.readyState >= 1) v.currentTime = t;
+      else v.addEventListener("loadedmetadata", () => { v.currentTime = t; }, { once: true });
+      v.play().catch(() => {});
+    }));
+    v.addEventListener("timeupdate", () => {
+      let k = -1;
+      starts.forEach((s, i) => { if (v.currentTime >= s - 0.25) k = i; });
+      chips.forEach((c, i) => c.setAttribute("aria-current", i === k ? "true" : "false"));
+    });
+  })();
+  </script>
 
   <!-- ======================= tl;dr ======================= -->
   <section aria-labelledby="tldr-h">
